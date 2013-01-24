@@ -1,25 +1,26 @@
 #luaprof
-a simple lua profile tool, check the time of all the lua function cost, and the count of they are called.
+a simple lua profile tool, check the time of lua function cost, and the count of they are called.
 
 ##Install
 
-edit Makefile, change the LUAINC depends on your own computer, then run commands below
+edit Makefile, change the LUAINC, it is the directory of lua.h and lauxlib.h stay in,
+then run commands below
 
 ```shell
 sudo make
-mv luaprof.so /usr/local/lib/lua/5.1/  #this dir may be different with your computer
+mv luaprof.so /usr/local/lib/lua/5.1/  #this dir may be different to your computer
 ```
 ##API
 ###start(filepath)
-start the luaprof, then the luaprof will begin to work from here
+start the luaprof, then the luaprof will begin to track your code from here
 
-the argument filepath should be an absolute path, and the file must can be writen
+NOTE : the argument filepath should be an absolute path, and the file must can be writen
 
 ###stop()
 stop the luaprof
 
 ###output()
-write the data into the file, which you assigned before in the api start()
+write the data into the file, which you assigned before in the function luaprof.start()
 
 ##Example
 see test.lua
