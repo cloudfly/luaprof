@@ -1,5 +1,4 @@
 local profile = require"luaprof"
-local json = require "cjson"
 
 function fibo(n)
     if n < 2 then
@@ -11,7 +10,6 @@ end
 
 function test()
     arr = {"hello", "world"}
-    str = json.encode(arr)
     print(str)
     for i=0,10000000,2 do
         i = i - 1
