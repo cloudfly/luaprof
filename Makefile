@@ -14,7 +14,7 @@ OBJS= luaprof.o
 
 profile: $(OBJS)
 	$(CC) -shared -o $(OUT) $(OBJS)
-	mv $(OUT) /usr/local/lib/lua/5.1/
+	#mv $(OUT) /usr/local/lib/lua/5.1/
 
 clean:
 	rm -f *.o a.out
