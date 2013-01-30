@@ -1,7 +1,7 @@
 #luaprof
 a simple lua profile tool, check the time of lua function cost, and the count of they are called.
 
-##Install
+##Installation
 
 edit Makefile, change the LUAINC, it is the directory of lua.h and lauxlib.h stay in,
 then run commands below
