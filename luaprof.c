@@ -3,39 +3,111 @@
 #include<unistd.h>
 #include<sys/time.h>
 #include<string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include"lua.h"
 #include"lauxlib.h"
 
 
 #define MAX 1000
 
-typedef struct {
+typedef struct Func{
     char *func_name;    /*function name*/
     char *source;       /*source of function, the file it defined*/
     char *type;         /*type of function;Lua | C | main*/
     int line;           /*the line number of the function defined*/
     int count;          /*count that the function has been called*/
-    long time;          /*time of the function total use*/
+    int recursive;       /*deep of recursive call*/
+    long total;          /*time of the function total cost*/
+    long time;           /*net time of the function cost*/
+    long net_begin;
+    long net_end;
     long begin;
-} func;
+    long end;
+} Func;
 
-func *funcs[MAX]; 
-int nfunc = 0;   /* 函数的个数*/
-long global_start_time, global_end_time;
+typedef struct FuncNode{
+    struct FuncNode *pre;
+    struct FuncNode *next;
+    Func *item;
+} FuncNode;
+
+FuncNode* state = (FuncNode*)NULL;
+
+Func *funcs[MAX]; 
+int nfunc = 0;       /*函数的个数*/
+long global_time;
 const char *filename;
 
-func* getfunc(const char *name);
+Func* getfunc(const char *name);
 long pf_gettime();
 void pf_hook(lua_State *L, lua_Debug *ar);
 int pf_call(lua_Debug *debug);
 int pf_ret(lua_Debug *debug);
 int pf_start(lua_State *L);
 int pf_stop(lua_State *L);
-int pf_output();
+int pf_output(lua_State *L);
 
 
-/* get the function named name from the array*/
-func* getfunc(const char *name)
+void pushFunc(Func *item) {
+
+    if (state) {
+
+        state->item->net_end = pf_gettime();
+        state->item->time += state->item->net_end - state->item->net_begin; /*save the time data of the stack's top function*/
+
+        FuncNode* tmp = (FuncNode*)malloc(sizeof(FuncNode));
+        tmp->item = item;
+        tmp->pre = state;
+        tmp->next = (FuncNode*)NULL;
+        state->next = tmp;
+
+        if (strcmp(state->item->func_name, item->func_name) == 0)   /*if is recursive call, add the recursion's depth*/
+            tmp->item->recursive = state->item->recursive + 1;
+
+        state = tmp;
+    } else {
+        state = (FuncNode*)malloc(sizeof(FuncNode*));
+        state->pre = (FuncNode*)NULL;
+        state->next = (FuncNode*)NULL;
+        state->item = item;
+    }
+}
+
+Func* popFunc() {
+    int now = pf_gettime();
+
+    if (state) {
+        Func* tmp = state->item;
+        tmp->net_end = tmp->end = now;
+        tmp->time += tmp->net_end - tmp->net_begin;
+        tmp->total = tmp->end - tmp->begin;
+        printf("function %s : time is %ld, total is %ld\n", tmp->func_name, tmp->time, tmp->total);
+
+        state = state->pre;
+
+        if (state) {
+            state->next = (FuncNode*)NULL;
+            state->item->net_begin = now;   /*reset the net-time's begin data of the stack-top function*/
+        }
+
+        return tmp;
+
+    } else {
+        return (Func*)NULL;
+    }
+}
+
+int checkStack(const char* name) {
+    return (state && strcmp(state->item->func_name, name) == 0) ? 1 : 0 ;
+}
+
+
+/*get the function by name from the array*/
+Func* getfunc(const char *name)
 {
     int i;
 
@@ -44,9 +116,49 @@ func* getfunc(const char *name)
             return funcs[i];
         }
     }
-    return (func*)0;
+    return (Func*)NULL;
 }
 
+
+/*add the function into data array*/
+void recordFunc(Func* item){
+    Func* res;
+    char* str;
+
+    if (item->recursive > 0) {
+        /*sprintf function can get the Bit count of a integer. use stdin to prevent printing content on the screen*/
+        str = (char*)malloc(sizeof(char) * (strlen(item->func_name) + sprintf((char*)stdin, "%d", item->recursive) + 2));
+        sprintf(str, "%s@%d", item->func_name, item->recursive);
+    } else {
+        str = (char*)malloc(sizeof(char) * strlen(item->func_name));
+        sprintf(str, "%s", item->func_name);
+    }
+
+    res = getfunc(str);
+
+    if ( ! res) {
+        free(item->func_name);
+        item->func_name = str;
+        funcs[nfunc++] = item;
+    } else {
+        res->count++;
+        res->time += item->time;
+        res->total += item->total;
+    }
+}
+
+Func* newFunc(){
+    Func* f;
+
+    f = (Func*)malloc(sizeof(Func));
+    f->count = 1;
+    f->recursive = 0;
+    f->time = f->total = 0;
+
+    return f;
+}
+
+/* get current system time */
 long pf_gettime()
 {
     struct timeval tv;
@@ -72,60 +184,75 @@ void pf_hook(lua_State *L, lua_Debug *ar)
 int pf_call(lua_Debug *debug) 
 {
 
-    func *res;
-    if ( ! debug || ! debug->name) return 0;
-    res = getfunc(debug->name);
+    Func *res;
 
-    if (*(debug->what) == 'C') return 0; /*ignore the C function*/
+    if ( ! debug || ! debug->name || *(debug->what) == 'C') return 0;
 
-    if ( ! res) {
-        res = funcs[nfunc++] = (func*)malloc(sizeof(func));
-        res->func_name = (char *)malloc(strlen(debug->name));
-        res->source = (char *)malloc(strlen(debug->short_src));
-        res->type = (char *)malloc(strlen(debug->what));
-        strcpy(res->func_name, debug->name);
-        strcpy(res->source, debug->short_src);
-        strcpy(res->type, debug->what);
-        res->line = debug->linedefined;
-        res->count= 1;
-        res->time = 0;
-    } else {
-        res->count++;
-    }
-    res->begin = pf_gettime();
+    res = newFunc();
+
+    res->func_name = (char *)malloc(strlen(debug->name));
+    res->source = (char *)malloc(strlen(debug->short_src));
+    res->type = (char *)malloc(strlen(debug->what));
+    strcpy(res->func_name, debug->name);
+    strcpy(res->source, debug->short_src);
+    strcpy(res->type, debug->what);
+
+    res->line = debug->linedefined;
+
+    res->begin = res->net_begin = pf_gettime();
+
+    pushFunc(res);
     return 1;
 }
 
 int pf_ret(lua_Debug *debug)
 {
-    long now = pf_gettime();
-    func *res;
-
     if ( ! debug || ! debug->name) return 0;
 
-    res = getfunc(debug->name);
+    if ( ! checkStack(debug->name)) return 0;   /*check if the stack top have the function named debug->name */
 
-    if(!res) return 0;
+    Func *res = popFunc();
 
-    res->time += (now - res->begin);
+    if (res)
+        recordFunc(res);
 
     return 1;
 }
 
 int pf_start(lua_State *L)
 {
+    Func* main;
     /*set the output file*/
     filename = luaL_checkstring(L, 1);
 
     memset(funcs, 0, MAX);
     lua_sethook(L, (lua_Hook)pf_hook, LUA_MASKCALL | LUA_MASKRET, 0);
-    global_start_time = pf_gettime();
+
+    main = newFunc();
+
+    main->func_name = (char *)malloc(sizeof(char) * 7);
+    main->source = (char *)NULL;
+    main->type = (char *)NULL;
+    strcpy(main->func_name, "main()");
+
+    main->net_begin = main->begin = pf_gettime();
+
+    pushFunc(main);
     return 0;
 }
 
 int pf_stop(lua_State *L)
 {
-    global_end_time = pf_gettime();
+    Func* item;
+
+    item = popFunc();
+
+    while(item) {
+        global_time = item->total;
+        recordFunc(item);
+        item = popFunc();
+    }
+
     lua_sethook(L, NULL, 0, 0);
     return 0;
 }
@@ -134,7 +261,6 @@ int pf_output(lua_State *L)
 {
     FILE *fp = fopen(filename, "w+");
     int i;
-    long global_total_time = global_end_time - global_start_time;
 
     if ( ! fp)
         luaL_error(L, "lprof error : Can not open output file:%s; ensure the file's limits is 666", filename);
@@ -142,9 +268,9 @@ int pf_output(lua_State *L)
 
     for(i = 0;i < nfunc;i++) {
         if (funcs[i])
-            fprintf(fp, "%-32s%-5d%-10ld%.2f%%   [%s]\n", funcs[i]->func_name, funcs[i]->count, funcs[i]->time, funcs[i]->time / (double)global_total_time * 100, funcs[i]->source);
+            fprintf(fp, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", funcs[i]->func_name, funcs[i]->count, funcs[i]->time, funcs[i]->time / (double)global_time * 100, funcs[i]->total, funcs[i]->total / (double)global_time * 100, funcs[i]->source);
     }
-    fprintf(fp, "\nTotal Time : %ld\n", global_total_time);
+    fprintf(fp, "\nTotal Time : %ld\n", global_time);
     fclose(fp);
 
     for(i = 0;i < nfunc;i++) free(funcs[i]);
@@ -152,10 +278,28 @@ int pf_output(lua_State *L)
     return 0;
 }
 
+int pf_test(lua_State *L){
+    lua_checkstack(L, 1);
+    char a[] = {'a', '\0', 'b'};
+    luaL_Buffer b;
+    luaL_buffinit(L, &b);
+    luaL_addlstring(&b, a, 3);
+    luaL_pushresult(&b);
+    return 1;
+}
+int pf_test2(lua_State *L) {
+    size_t l;
+    const char* str = luaL_checklstring(L, 1, &l);
+    printf("the strlen of %s is %d:%d\n", str, (int)strlen(str), (int)l);
+    return 0;
+}
+
 static const struct luaL_Reg lib[] = {
     {"start", pf_start},
     {"stop", pf_stop},
     {"output", pf_output},
+    {"test", pf_test},
+    {"test2", pf_test2},
     {NULL, NULL}
 };
 
@@ -166,3 +310,7 @@ int luaopen_luaprof(lua_State *L)
 
     return 1;
 }
+
+#ifdef __cplusplus
+}
+#endif

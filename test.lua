@@ -1,28 +1,29 @@
 local profile = require"luaprof"
 
+local str = ""
+
 function fibo(n)
-    if n < 2 then
+
+    if n < 3 then
         return 1
     else
         return fibo(n - 1) + fibo(n - 2)
     end
 end
 
-function test()
-    arr = {"hello", "world"}
-    print(str)
-    for i=0,10000000,2 do
-        i = i - 1
+function test1()
+    for i = 1,500,2 do
+        str = str .. i
     end
-    fibo(6)
+    fibo(20)
 end
 
-profile.start("/home/cloudfly/work/logs/test_prof.out")
+profile.start("./out_test")
 
-test()
+test1()
 
 profile.stop()
-profile.output()
 
+profile.output()
 
 
