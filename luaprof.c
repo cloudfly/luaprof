@@ -42,7 +42,7 @@ int nfunc = 0;       /*函数的个数*/
 long global_time;
 const char *filename;
 
-Func* getfunc(const char *name);
+Func* getFunc(const char *name);
 long pf_gettime();
 void pf_hook(lua_State *L, lua_Debug *ar);
 int pf_call(lua_Debug *debug);
@@ -106,8 +106,8 @@ int checkStack(const char* name) {
 }
 
 
-/*get the function by name from the array*/
-Func* getfunc(const char *name)
+/*get the function by name from the list*/
+Func* getFunc(const char *name)
 {
     int i;
 
@@ -134,7 +134,7 @@ void recordFunc(Func* item){
         sprintf(str, "%s", item->func_name);
     }
 
-    res = getfunc(str);
+    res = getFunc(str);
 
     if ( ! res) {
         free(item->func_name);
