@@ -15,7 +15,7 @@ function test1()
     for i = 1,500,2 do
         str = str .. i
     end
-    fibo(20)
+    fibo(10)
 end
 
 profile.start("./out_test")
