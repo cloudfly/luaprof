@@ -15,7 +15,7 @@ OBJS= luaprof.o
 #profile: $(OBJS)
 #	$(CC) -shared -o $(OUT) $(OBJS)
 profile: 
-	$(CC) -shared -o $(OUT) $(CFLAGS) luaprof.c
+	$(CC) -shared -o $(OUT) $(CFLAGS) -I./ luaprof.c
 
 clean:
 	rm -f *.o a.out

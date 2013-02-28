@@ -10,31 +10,11 @@ extern "C" {
 
 #include"lua.h"
 #include"lauxlib.h"
+#include"luaprof.h"
 
 
-#define MAX 1000
 
-typedef struct Func{
-    char *func_name;    /*function name*/
-    char *source;       /*source of function, the file it defined*/
-    char *type;         /*type of function;Lua | C | main*/
-    int line;           /*the line number of the function defined*/
-    int count;          /*count that the function has been called*/
-    int recursive;       /*deep of recursive call*/
-    long total;          /*time of the function total cost*/
-    long time;           /*net time of the function cost*/
-    long net_begin;
-    long net_end;
-    long begin;
-    long end;
-} Func;
-
-typedef struct FuncNode{
-    struct FuncNode *pre;
-    struct FuncNode *next;
-    Func *item;
-} FuncNode;
-
+/*The stack*/
 FuncNode* state = (FuncNode*)NULL;
 
 Func *funcs[MAX]; 
@@ -50,6 +30,8 @@ int pf_ret(lua_Debug *debug);
 int pf_start(lua_State *L);
 int pf_stop(lua_State *L);
 int pf_output(lua_State *L);
+int sameName(const char* a, const char* b);
+Func* newFunc();
 
 
 void pushFunc(Func *item) {
@@ -65,7 +47,7 @@ void pushFunc(Func *item) {
         tmp->next = (FuncNode*)NULL;
         state->next = tmp;
 
-        if (strcmp(state->item->func_name, item->func_name) == 0)   /*if is recursive call, add the recursion's depth*/
+        if (sameName(state->item->func_name, item->func_name))   /*if is recursive call, add the recursion's depth*/
             tmp->item->recursive = state->item->recursive + 1;
 
         state = tmp;
@@ -85,7 +67,6 @@ Func* popFunc() {
         tmp->net_end = tmp->end = now;
         tmp->time += tmp->net_end - tmp->net_begin;
         tmp->total = tmp->end - tmp->begin;
-        printf("function %s : time is %ld, total is %ld\n", tmp->func_name, tmp->time, tmp->total);
 
         state = state->pre;
 
@@ -101,8 +82,19 @@ Func* popFunc() {
     }
 }
 
+int sameName(const char* a, const char* b) {
+    int a_len = strlen(a);
+    int b_len = strlen(b);
+
+    if (a_len == b_len) return strcmp(a, b) == 0;
+
+    else if (a_len > b_len) return strncmp(a, b, b_len) == 0 && a[b_len] == '@';
+
+    else return strncmp(a, b, a_len) == 0 && b[a_len] == '@';
+}
+
 int checkStack(const char* name) {
-    return (state && strcmp(state->item->func_name, name) == 0) ? 1 : 0 ;
+    return (state && sameName(state->item->func_name, name)) ? 1 : 0 ;
 }
 
 
@@ -202,6 +194,7 @@ int pf_call(lua_Debug *debug)
     res->begin = res->net_begin = pf_gettime();
 
     pushFunc(res);
+    recordFunc(res);
     return 1;
 }
 
@@ -211,10 +204,7 @@ int pf_ret(lua_Debug *debug)
 
     if ( ! checkStack(debug->name)) return 0;   /*check if the stack top have the function named debug->name */
 
-    Func *res = popFunc();
-
-    if (res)
-        recordFunc(res);
+    popFunc();
 
     return 1;
 }
@@ -238,6 +228,7 @@ int pf_start(lua_State *L)
     main->net_begin = main->begin = pf_gettime();
 
     pushFunc(main);
+    recordFunc(main);
     return 0;
 }
 
@@ -249,7 +240,6 @@ int pf_stop(lua_State *L)
 
     while(item) {
         global_time = item->total;
-        recordFunc(item);
         item = popFunc();
     }
 
