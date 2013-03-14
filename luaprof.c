@@ -34,9 +34,10 @@ void pushFunc(Func *item) {
 
 Func* popFunc() {
     int now = gettime();
+    Func* tmp;
 
     if (state) {
-        Func* tmp = state->item;
+        tmp = state->item;
         tmp->net_end = tmp->end = now;
         tmp->time += tmp->net_end - tmp->net_begin;
         tmp->total = tmp->end - tmp->begin;
@@ -84,9 +85,10 @@ void recordFunc(Func* item, int cld){
         item->func_name = str;
         ci = add_func(t, item);
     } else {
+        /*old func*/
         res->count++;
-        res->time += item->time;
-        res->total += item->total;
+        res->time = item->time;
+        res->total = item->total;
     }
 
     /* the func being called, add it to children. */
@@ -165,7 +167,8 @@ int pf_start(lua_State *L)
     /*set the output file*/
     filename = luaL_checkstring(L, 1);
 
-    memset(t->table, 0, MAX);
+    t = (tree*)malloc(sizeof(tree));
+    memset(t->table, 0, sizeof(t->table));
     t->nfunc = 0;
     lua_sethook(L, (lua_Hook)pf_hook, LUA_MASKCALL | LUA_MASKRET, 0);
 
