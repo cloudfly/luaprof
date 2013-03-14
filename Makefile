@@ -1,10 +1,10 @@
 
 
-LUAINC= /usr/local/openresty/lua/include
+LUAINC= /usr/local/lua/include
 
 OUT= luaprof.so
 
-CC= g++
+CC= gcc
 WARN= -fPIC -pedantic -Wall -W
 INCS= -I$(LUAINC)
 
@@ -15,7 +15,7 @@ OBJS= luaprof.o
 #profile: $(OBJS)
 #	$(CC) -shared -o $(OUT) $(OBJS)
 profile: 
-	$(CC) -shared -o $(OUT) $(CFLAGS) -I./ luaprof.c
+	$(CC) -shared -o $(OUT) $(CFLAGS) -I./ luaprof.c common.c tree.c
 
 clean:
 	rm -f *.o a.out

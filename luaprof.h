@@ -1,4 +1,13 @@
-#define MAX 1000
+#ifndef _LUAPROF_H_
+#define _LUAPROF_H_
+
+#include<stdlib.h>
+#include<stdio.h>
+#include<unistd.h>
+#include<string.h>
+#include"lua.h"
+#include"lauxlib.h"
+#include"common.h"
 
 typedef struct Func{
     char *func_name;    /*function name*/
@@ -21,18 +30,15 @@ typedef struct FuncNode{
     Func *item;
 } FuncNode;
 
-/*tree node, store the function info*/
-typedef struct FuncTreeNode {
-    Func* item;
-    /*children is a integer array, one value is the FuncTreeNode'index in the tree, the following value is the FuncTreeNode's calling count
-     *
-     * eg: children[0] = 5,children[1] = 3. mean this function have called table[5] for 3 times;
-     * */
+/*The stack*/
 
-    int* children;
-} FuncTreeNode;
-
-/*The tree, the array have the tree model*/
-FuncTreeNode* table[MAX];
+void pf_hook(lua_State *L, lua_Debug *ar);
+int pf_call(lua_Debug *debug);
+int pf_ret(lua_Debug *debug);
+int pf_start(lua_State *L);
+int pf_stop(lua_State *L);
+int pf_output(lua_State *L);
+Func* newFunc();
 
 
+#endif
