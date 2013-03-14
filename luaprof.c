@@ -41,7 +41,6 @@ Func* popFunc() {
         tmp->net_end = tmp->end = now;
         tmp->time += tmp->net_end - tmp->net_begin;
         tmp->total += tmp->end - tmp->begin;
-        printf("%s at %d 's time is %ld\n", tmp->func_name, tmp->index,tmp->time);
 
         state = state->pre;
 
@@ -89,6 +88,11 @@ void recordFunc(Func* item, int cld){
         add_func(t, item);
     } else {
         /*old func*/
+        /*
+         * `item` has been in tree, 
+         * give its data, let it compute based on these data.
+         * because now `item` and `res` are the same function.
+         */
         item->count = ++(res->count);
         item->time = res->time;
         item->total = res->total;
@@ -97,7 +101,10 @@ void recordFunc(Func* item, int cld){
 
     /* the func being called, add it to children. */
     if (cld) {
-        prt = get_func(t, state->item->func_name);
+        /* now this func is on stack top, its parent is down item
+         * so, it's state->pre
+         */
+        prt = get_func(t, state->pre->item->func_name);
         add_cld(t, prt->index, item->index);
     }
 }
@@ -223,7 +230,18 @@ int pf_output(lua_State *L)
     fprintf(fp, "\nTotal Time : %ld\n", global_time);
     fclose(fp);
 
-    for(i = 0;i < t->nfunc;i++) free(t->table[i]);
+    child *cld;
+    Func *tmp;
+    for(i = 0;i < t->nfunc;i++) {
+        printf("%s()\n", t->table[i]->item->func_name);
+        cld = t->table[i]->children;
+        while(cld) {
+            tmp = t->table[cld->index]->item;
+            printf("    -->%s() %d times\n", tmp->func_name, (int)cld->count);
+            cld = cld->next;
+        }
+        free(t->table[i]);
+    }
     
     return 0;
 }

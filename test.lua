@@ -15,12 +15,21 @@ function test1()
     for i = 1,500,2 do
         str = str .. i
     end
-    fibo(10)
 end
 
-profile.start("./out_test")
+function test2()
+    local a = 0;
+    test1()
+    test1()
+    test1()
+    for i = 1, 1000000, 1 do
+        a = a + 1
+    end
+end
 
-test1()
+profile.start("./out_test2")
+
+test2()
 
 profile.stop()
 
