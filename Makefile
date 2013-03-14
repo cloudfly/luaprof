@@ -12,10 +12,10 @@ CFLAGS= $(INCS) $(WARN) -O2
 
 OBJS= luaprof.o
 
-#profile: $(OBJS)
+#profil: $(OBJS)
 #	$(CC) -shared -o $(OUT) $(OBJS)
 profile: 
-	$(CC) -shared -o $(OUT) $(CFLAGS) -I./ luaprof.c common.c tree.c
+	$(CC) -shared -o $(OUT) $(CFLAGS) -I./ luaprof.c common.c tree.c data.c
 
 clean:
 	rm -f *.o a.out

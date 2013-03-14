@@ -1,5 +1,6 @@
 #include"luaprof.h"
 #include"tree.h"
+#include"data.h"
 
 tree* t;
 long global_time;
@@ -230,18 +231,9 @@ int pf_output(lua_State *L)
     fprintf(fp, "\nTotal Time : %ld\n", global_time);
     fclose(fp);
 
-    child *cld;
-    Func *tmp;
-    for(i = 0;i < t->nfunc;i++) {
-        printf("%s()\n", t->table[i]->item->func_name);
-        cld = t->table[i]->children;
-        while(cld) {
-            tmp = t->table[cld->index]->item;
-            printf("    -->%s() %d times\n", tmp->func_name, (int)cld->count);
-            cld = cld->next;
-        }
-        free(t->table[i]);
-    }
+    data2dot(t);
+
+    for(i = 0;i < t->nfunc;i++) free(t->table[i]);
     
     return 0;
 }
