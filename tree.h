@@ -27,11 +27,12 @@ typedef struct tree {
 } tree;
 
 Func* get_func(tree* t, const char* name);
-Func* get_ifunc(tree* t, const char* name, int* idx);
 
 /*return the index of func in table*/
-unsigned int add_func(tree* t, Func* item);
+void add_func(tree* t, Func* item);
 
 int add_cld(tree* t, int idx, int cidx);
+
+void update_time(tree* t, int idx, Func* f);
 
 #endif

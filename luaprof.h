@@ -22,6 +22,7 @@ typedef struct Func{
     long net_end;
     long begin;
     long end;
+    int index;  /*index the function in the tree*/
 } Func;
 
 typedef struct FuncNode{

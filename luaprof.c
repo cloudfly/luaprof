@@ -40,7 +40,8 @@ Func* popFunc() {
         tmp = state->item;
         tmp->net_end = tmp->end = now;
         tmp->time += tmp->net_end - tmp->net_begin;
-        tmp->total = tmp->end - tmp->begin;
+        tmp->total += tmp->end - tmp->begin;
+        printf("%s at %d 's time is %ld\n", tmp->func_name, tmp->index,tmp->time);
 
         state = state->pre;
 
@@ -48,6 +49,9 @@ Func* popFunc() {
             state->next = (FuncNode*)NULL;
             state->item->net_begin = now;   /*reset the net-time's begin data of the stack-top function*/
         }
+
+        /*give running data to tree*/
+        update_time(t, tmp->index, tmp);
 
         return tmp;
 
@@ -63,9 +67,8 @@ int checkStack(const char* name) {
 
 /*add the function into data array, cld : whether this func is a child, every function is child except main()*/
 void recordFunc(Func* item, int cld){
-    Func* res;
+    Func *res, *prt;
     char* str;
-    int pi, ci;/*index of parent and child function.*/
 
     if (item->recursive > 0) {
         /*sprintf function can get the Bit count of a integer. use stdin to prevent printing content on the screen*/
@@ -77,24 +80,25 @@ void recordFunc(Func* item, int cld){
     }
 
     /*get func in tree.*/
-    res = get_ifunc(t, str, &ci);
+    res = get_func(t, str);
 
     /* new func */
     if ( ! res) {
         free(item->func_name);
         item->func_name = str;
-        ci = add_func(t, item);
+        add_func(t, item);
     } else {
         /*old func*/
-        res->count++;
-        res->time = item->time;
-        res->total = item->total;
+        item->count = ++(res->count);
+        item->time = res->time;
+        item->total = res->total;
+        item->index = res->index;
     }
 
     /* the func being called, add it to children. */
     if (cld) {
-        get_ifunc(t, state->item->func_name, &pi);
-        add_cld(t, pi, ci);
+        prt = get_func(t, state->item->func_name);
+        add_cld(t, prt->index, item->index);
     }
 }
 
@@ -105,6 +109,7 @@ Func* newFunc(){
     f->count = 1;
     f->recursive = 0;
     f->time = f->total = 0;
+    f->index = -1;
 
     return f;
 }
@@ -145,6 +150,7 @@ int pf_call(lua_Debug *debug)
 
     res->begin = res->net_begin = gettime();
 
+    /*can not change the order of two line below, pushFunc can set the recursive to res, then recordFunc use recursive to record function*/
     pushFunc(res);
     recordFunc(res, 1);
     return 1;

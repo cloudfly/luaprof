@@ -16,33 +16,14 @@ Func* get_func(tree* t, const char* name){
     return (Func*)NULL;
 }
 
-/*
- * find function by name in tree, and give index to argument dix
- */
-Func* get_ifunc(tree* t, const char* name, int* idx) {
-    unsigned int i;
-    
-    for(i = 0; i < t->nfunc; i++) {
-        if (strcmp(name, t->table[i]->item->func_name) == 0) {
-            *idx = (int)i;
-            return t->table[i]->item;
-        }
-    }
-
-    *idx = -1;
-    return (Func*)NULL;
-
-}
-
 /*add function, return index of new func*/
-unsigned int add_func(tree* t, Func* f){
+void add_func(tree* t, Func* f){
 
     FuncTreeNode* nnode = (FuncTreeNode*)malloc(sizeof(FuncTreeNode));
+    f->index = t->nfunc;
     nnode->item = f;
     nnode->children = (child*)NULL;
     t->table[t->nfunc++] = nnode;
-
-    return t->nfunc - 1;
 }
 
 int add_cld(tree* t, int idx, int cidx) {
@@ -63,4 +44,12 @@ int add_cld(tree* t, int idx, int cidx) {
     iter->index = cidx; iter->count = 1; iter->next = f->children;
     f->children = iter;
     return 0;
+}
+
+void update_time(tree* t, int idx, Func* f) {
+
+    if (idx >= 0 && idx < (int)t->nfunc) {
+        t->table[idx]->item->time = f->time;
+        t->table[idx]->item->total = f->total;
+    }
 }
