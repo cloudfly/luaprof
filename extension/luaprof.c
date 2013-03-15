@@ -4,7 +4,6 @@
 
 tree* t;
 long global_time;
-const char *filename;
 FuncNode* state = (FuncNode*)NULL;
 
 void pushFunc(Func *item) {
@@ -15,7 +14,7 @@ void pushFunc(Func *item) {
         state->item->net_end = gettime();
         state->item->time += state->item->net_end - state->item->net_begin; /*save the time data of the stack's top function*/
 
-        tmp = (FuncNode*)malloc(sizeof(FuncNode));
+        tmp = (FuncNode*)lloc(sizeof(FuncNode));
         tmp->item = item;
         tmp->pre = state;
         tmp->next = (FuncNode*)NULL;
@@ -26,7 +25,7 @@ void pushFunc(Func *item) {
 
         state = tmp;
     } else {
-        state = (FuncNode*)malloc(sizeof(FuncNode*));
+        state = (FuncNode*)lloc(sizeof(FuncNode));
         state->pre = (FuncNode*)NULL;
         state->next = (FuncNode*)NULL;
         state->item = item;
@@ -72,10 +71,10 @@ void recordFunc(Func* item, int cld){
 
     if (item->recursive > 0) {
         /*sprintf function can get the Bit count of a integer. use stdin to prevent printing content on the screen*/
-        str = (char*)malloc(sizeof(char) * (strlen(item->func_name) + sprintf((char*)stdin, "%d", item->recursive) + 2));
+        str = (char*)lloc(sizeof(char) * (strlen(item->func_name) + sprintf((char*)stdin, "%d", item->recursive) + 2));
         sprintf(str, "%s@%d", item->func_name, item->recursive);
     } else {
-        str = (char*)malloc(sizeof(char) * strlen(item->func_name));
+        str = (char*)lloc(sizeof(char) * strlen(item->func_name));
         sprintf(str, "%s", item->func_name);
     }
 
@@ -84,7 +83,6 @@ void recordFunc(Func* item, int cld){
 
     /* new func */
     if ( ! res) {
-        free(item->func_name);
         item->func_name = str;
         add_func(t, item);
     } else {
@@ -113,7 +111,7 @@ void recordFunc(Func* item, int cld){
 Func* newFunc(){
     Func* f;
 
-    f = (Func*)malloc(sizeof(Func));
+    f = (Func*)lloc(sizeof(Func));
     f->count = 1;
     f->line = -1;
     f->recursive = 0;
@@ -148,9 +146,9 @@ int pf_call(lua_Debug *debug)
 
     res = newFunc();
 
-    res->func_name = (char *)malloc(strlen(debug->name));
-    res->source = (char *)malloc(strlen(debug->short_src));
-    res->type = (char *)malloc(strlen(debug->what));
+    res->func_name = (char *)lloc(strlen(debug->name));
+    res->source = (char *)lloc(strlen(debug->short_src));
+    res->type = (char *)lloc(strlen(debug->what));
     strcpy(res->func_name, debug->name);
     strcpy(res->source, debug->short_src);
     strcpy(res->type, debug->what);
@@ -179,17 +177,16 @@ int pf_ret(lua_Debug *debug)
 int pf_start(lua_State *L)
 {
     Func* _main;
-    /*set the output file*/
-    filename = luaL_checkstring(L, 1);
+    gc.n = 0;
 
-    t = (tree*)malloc(sizeof(tree));
+    t = (tree*)lloc(sizeof(tree));
     memset(t->table, 0, sizeof(t->table));
     t->nfunc = 0;
     lua_sethook(L, (lua_Hook)pf_hook, LUA_MASKCALL | LUA_MASKRET, 0);
 
     _main = newFunc();
 
-    _main->func_name = (char *)malloc(sizeof(char) * 7);
+    _main->func_name = (char *)lloc(sizeof(char) * 7);
     _main->source = (char *)NULL;
     _main->type = (char *)NULL;
     strcpy(_main->func_name, "main()");
@@ -216,35 +213,57 @@ int pf_stop(lua_State *L)
     return 0;
 }
 
-int pf_output(lua_State *L)
-{
-    unsigned int i;
+int pf_save2dot(lua_State *L) {
+    const char* fdot = luaL_checkstring(L, 1);
+    char *fpng;
 
-    /*
-    if (!data2dot(t)) {
+    if (lua_isstring(L, 2)) {
+        fpng = (char*)luaL_checkstring(L, 2);
+    } else {
+        fpng = (char*)NULL;
+    }
+
+    if ( ! data2dot(t, fdot, (const char*)fpng)) {
         luaL_error(L, "%s\n", error);
     }
-    */
-
-    if ( ! data2js(t, filename)) {
-        luaL_error(L, "data2js\n");
-    }
-
-    /*
-    if ( ! data2text(t, filename)) {
-        luaL_error(L, "data2text\n");
-    }
-    */
-
-    for(i = 0;i < t->nfunc;i++) free(t->table[i]);
-    
     return 0;
 }
+int pf_save2js(lua_State *L) {
+    const char* filename = luaL_checkstring(L, 1);
+
+    if ( ! data2js(t, filename)) {
+        luaL_error(L, "data2js, %s\n", error);
+    }
+    return 0;
+}
+int pf_save2txt(lua_State *L) {
+    const char* filename = luaL_checkstring(L, 1);
+
+    if ( ! data2text(t, filename)) {
+        luaL_error(L, "data2text, %s\n", error);
+    }
+    return 0;
+}
+
+int pf_release() {
+
+    int i;
+
+    for(i = 0;i < gc.n; i++) {
+        if (gc.table[i]) free(gc.table[i]);
+    }
+    return 0;
+}
+
+
 
 static const struct luaL_Reg lib[] = {
     {"start", pf_start},
     {"stop", pf_stop},
-    {"output", pf_output},
+    {"save2dot", pf_save2dot},
+    {"save2js", pf_save2js},
+    {"save2txt", pf_save2txt},
+    {"release", pf_release},
     {NULL, NULL}
 };
 

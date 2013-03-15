@@ -19,3 +19,9 @@ long gettime()
     gettimeofday(&tv, NULL);
     return tv.tv_usec;
 }
+
+void* lloc(int size) {
+    gc.table[gc.n] = malloc(size);
+    return gc.table[gc.n++];
+
+}

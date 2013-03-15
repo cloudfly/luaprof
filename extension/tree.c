@@ -19,7 +19,7 @@ Func* get_func(tree* t, const char* name){
 /*add function, return index of new func*/
 void add_func(tree* t, Func* f){
 
-    FuncTreeNode* nnode = (FuncTreeNode*)malloc(sizeof(FuncTreeNode));
+    FuncTreeNode* nnode = (FuncTreeNode*)lloc(sizeof(FuncTreeNode));
     f->index = t->nfunc;
     nnode->item = f;
     nnode->children = (child*)NULL;
@@ -40,7 +40,7 @@ int add_cld(tree* t, int idx, int cidx) {
     }
 
     /*child not exist, create new one */
-    iter = (child*)malloc(sizeof(child));
+    iter = (child*)lloc(sizeof(child));
     iter->index = cidx; iter->count = 1; iter->next = f->children;
     f->children = iter;
     return 0;

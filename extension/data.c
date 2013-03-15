@@ -1,11 +1,10 @@
 #include"data.h"
 
-int data2dot(tree* t) {
+int data2dot(tree* t, const char *fdot, const char *fpng) {
     unsigned int i;
     child *cld;
-    char *fpath = "/tmp/.dotfile";
     char *cmd;
-    FILE *fp = fopen(fpath, "w+");
+    FILE *fp = fopen(fdot, "w+");
 
     if ( ! fp) {
         error = "[ERROR]: can not create file\n";
@@ -31,8 +30,8 @@ int data2dot(tree* t) {
     fprintf(fp, "}\n");
     fclose(fp);
 
-    cmd = (char*)malloc(sizeof(char) * (24 + strlen(fpath)));
-    sprintf(cmd, "dot -Tpng -o graph.png %s", fpath);
+    cmd = (char*)lloc(sizeof(char) * (24 + strlen(fdot)));
+    sprintf(cmd, "dot -Tpng -o %s %s", fpng, fdot);
 
     if(system(cmd) == -1) {
         error = "Failed to generate graph\n";

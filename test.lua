@@ -34,6 +34,9 @@ fibo(5)
 
 profile.stop()
 
-profile.output()
+profile.save2dot("./out.dot", "./out.png")
+profile.save2js("./out.js")
+profile.save2txt("./out.txt")
+profile.release()
 
 

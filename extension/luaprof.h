@@ -31,7 +31,13 @@ typedef struct FuncNode{
     Func *item;
 } FuncNode;
 
+typedef struct mem{ 
+    void *table[10000];
+    int n;
+} mem;
+
 char* error;
+mem gc;
 
 /*The stack*/
 
