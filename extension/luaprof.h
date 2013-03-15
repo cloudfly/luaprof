@@ -31,6 +31,8 @@ typedef struct FuncNode{
     Func *item;
 } FuncNode;
 
+char* error;
+
 /*The stack*/
 
 void pf_hook(lua_State *L, lua_Debug *ar);

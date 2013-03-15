@@ -115,6 +115,7 @@ Func* newFunc(){
 
     f = (Func*)malloc(sizeof(Func));
     f->count = 1;
+    f->line = -1;
     f->recursive = 0;
     f->time = f->total = 0;
     f->index = -1;
@@ -217,40 +218,26 @@ int pf_stop(lua_State *L)
 
 int pf_output(lua_State *L)
 {
-    FILE *fp = fopen(filename, "w+");
     unsigned int i;
 
-    if ( ! fp)
-        luaL_error(L, "lprof error : Can not open output file:%s; ensure the file's limits is 666", filename);
-
-
-    for(i = 0;i < t->nfunc;i++) {
-        if (t->table[i])
-            fprintf(fp, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", t->table[i]->item->func_name, t->table[i]->item->count, t->table[i]->item->time, t->table[i]->item->time / (double)global_time * 100, t->table[i]->item->total, t->table[i]->item->total / (double)global_time * 100, t->table[i]->item->source);
+    /*
+    if (!data2dot(t)) {
+        luaL_error(L, "%s\n", error);
     }
-    fprintf(fp, "\nTotal Time : %ld\n", global_time);
-    fclose(fp);
+    */
 
-    data2dot(t);
+    if ( ! data2js(t, filename)) {
+        luaL_error(L, "data2js\n");
+    }
+
+    /*
+    if ( ! data2text(t, filename)) {
+        luaL_error(L, "data2text\n");
+    }
+    */
 
     for(i = 0;i < t->nfunc;i++) free(t->table[i]);
     
-    return 0;
-}
-
-int pf_test(lua_State *L){
-    char a[] = {'a', '\0', 'b'};
-    luaL_Buffer b;
-    lua_checkstack(L, 1);
-    luaL_buffinit(L, &b);
-    luaL_addlstring(&b, a, 3);
-    luaL_pushresult(&b);
-    return 1;
-}
-int pf_test2(lua_State *L) {
-    size_t l;
-    const char* str = luaL_checklstring(L, 1, &l);
-    printf("the strlen of %s is %d:%d\n", str, (int)strlen(str), (int)l);
     return 0;
 }
 
@@ -258,8 +245,6 @@ static const struct luaL_Reg lib[] = {
     {"start", pf_start},
     {"stop", pf_stop},
     {"output", pf_output},
-    {"test", pf_test},
-    {"test2", pf_test2},
     {NULL, NULL}
 };
 

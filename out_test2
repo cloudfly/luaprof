@@ -1,9 +1,0 @@
-main()                          1         35             0.25%  13880          100.00%   [(null)]
-test2                           1         12793          92.17%  13280          95.68%   [test.lua]
-test1                           2         975            7.02%  1037           7.47%   [test.lua]
-fibo                            3         8              0.06%  77             0.55%   [test.lua]
-fibo@1                          6         57             0.41%  69             0.50%   [test.lua]
-fibo@2                          8         11             0.08%  13             0.09%   [test.lua]
-fibo@3                          2         2              0.01%  2              0.01%   [test.lua]
-
-Total Time : 13880
