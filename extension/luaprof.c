@@ -250,7 +250,11 @@ int pf_release() {
     int i;
 
     for(i = 0;i < gc.n; i++) {
-        if (gc.table[i]) free(gc.table[i]);
+
+        if (gc.table[i]) {
+            free(gc.table[i]);
+            gc.table[i] = NULL;
+        }
     }
     return 0;
 }

@@ -30,12 +30,15 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
     fprintf(fp, "}\n");
     fclose(fp);
 
-    cmd = (char*)lloc(sizeof(char) * (24 + strlen(fdot)));
-    sprintf(cmd, "dot -Tpng -o %s %s", fpng, fdot);
+    if (fpng) {
+        cmd = (char*)lloc(sizeof(char) * (15 + strlen(fdot) + strlen(fpng)));
+        sprintf(cmd, "dot -Tpng -o %s %s", fpng, fdot);
 
-    if(system(cmd) == -1) {
-        error = "Failed to generate graph\n";
-        return 0;
+        if(system(cmd) < 0) {
+            error = "Failed to generate graph\n";
+            free(cmd);
+            return 0;
+        }
     }
 
     return 1;
