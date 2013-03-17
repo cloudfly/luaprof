@@ -1,0 +1,66 @@
+/*ALL*/
+body {
+    width:100%;
+}
+#wrapper {
+    width:1000px;
+    margin:30px auto;
+}
+
+/*table style*/
+#table {
+    width:1000px;
+    margin:20px 0;
+}
+#table table {
+    width:100%;
+    border-collapse:collapse;
+    border-color:#c9c9c9;
+    border-spacing:0;
+    border-radius:5px;
+    background:#989797;
+}
+#table table th{
+    text-align:left;
+    cursor:pointer;
+}
+#table table th:hover{
+    color:green;
+}
+#table table td, #table table th {
+    padding:3px 5px;
+    border:1px solid #ccc;
+}
+#table .even {
+    background:#eaeaea;
+}
+#table .odd{
+    background:#fff;
+}
+
+
+/*pie charts*/
+.pie {
+    width:500px;
+    height:400px;
+    margin:0;
+    float:left;
+}
+
+
+
+/*flow charts*/
+#graph {
+    width:1000px;
+    float:left;
+    margin:20px auto;
+    text-align:center;
+}
+#graph img{
+}
+
+
+/*public */
+.clear {
+    clear:both;
+}
