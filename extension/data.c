@@ -32,7 +32,7 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
 
     if (fpng) {
         cmd = (char*)lloc(sizeof(char) * (15 + strlen(fdot) + strlen(fpng)));
-        sprintf(cmd, "dot -Tpng -o %s %s", fpng, fdot);
+        sprintf(cmd, CMD_PNG, fpng, fdot);
 
         if(system(cmd) < 0) {
             error = "Failed to generate graph\n";
@@ -89,6 +89,20 @@ int data2js(tree* t, const char* fpath) {
     }
     fprintf(fp, "];\n");
     fclose(fp);
+    return 1;
+}
+
+int print_result(tree* t) {
+
+    unsigned int i;
+
+    for(i = 0;i < t->nfunc;i++) {
+
+        if (t->table[i])
+            printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", t->table[i]->item->func_name, t->table[i]->item->count, t->table[i]->item->time, t->table[i]->item->time / (double)t->table[0]->item->total * 100, t->table[i]->item->total, t->table[i]->item->total / (double)t->table[0]->item->total * 100, t->table[i]->item->source);
+    }
+
+    printf("\nTotal Time : %ld\n", t->table[0]->item->total);
     return 1;
 }
 

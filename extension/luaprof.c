@@ -3,7 +3,7 @@
 #include"data.h"
 
 tree* t;
-long global_time;
+unsigned long global_time;
 FuncNode* state = (FuncNode*)NULL;
 
 void pushFunc(Func *item) {
@@ -245,9 +245,31 @@ int pf_save2txt(lua_State *L) {
     return 0;
 }
 
+int pf_printr(lua_State *L) {
+
+    unsigned int i, c = 1;
+    char str[1000];
+
+    lua_checkstack(L, t->nfunc);
+
+    for(i = 0;i < t->nfunc;i++) {
+
+        if (t->table[i]) {
+            sprintf(str, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", t->table[i]->item->func_name, t->table[i]->item->count, t->table[i]->item->time, t->table[i]->item->time / (double)t->table[0]->item->total * 100, t->table[i]->item->total, t->table[i]->item->total / (double)t->table[0]->item->total * 100, t->table[i]->item->source);
+            lua_pushstring(L, str); c++; memset(str, 0, sizeof(str));
+        }
+    }
+
+    sprintf(str, "\nTotal Time : %ld\n", t->table[0]->item->total);
+    lua_pushstring(L, str); 
+    lua_call(L, c, 0);
+
+    return 0;
+}
+
 int pf_release() {
 
-    int i;
+    unsigned int i;
 
     for(i = 0;i < gc.n; i++) {
 
@@ -260,13 +282,13 @@ int pf_release() {
 }
 
 
-
 static const struct luaL_Reg lib[] = {
     {"start", pf_start},
     {"stop", pf_stop},
     {"save2dot", pf_save2dot},
     {"save2js", pf_save2js},
     {"save2txt", pf_save2txt},
+    {"print_result", pf_printr},
     {"release", pf_release},
     {NULL, NULL}
 };
