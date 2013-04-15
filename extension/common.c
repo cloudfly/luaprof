@@ -17,9 +17,19 @@ unsigned int sameName(const char* a, const char* b) {
 /* get current system time */
 unsigned long gettime()
 {
+    /*crossing second may happen between twice calling*/
+    static unsigned long isec = 0;
+
     struct timeval tv;
+
     gettimeofday(&tv, NULL);
-    return tv.tv_usec;
+
+    if(!isec) {
+        isec = (unsigned long)tv.tv_sec;
+    }
+
+    return (unsigned long)tv.tv_usec + ((unsigned long)tv.tv_sec - isec)*1000000;
+
 }
 
 void* lloc(int size) {
