@@ -33,13 +33,20 @@ unsigned long gettime()
 }
 
 void* lloc(int size) {
-    gc.table[gc.n] = malloc(size);
 
-    if ( ! gc.table[gc.n]) {
+    void *m = NULL;
+    m = malloc(size);
+
+    if ( ! m) {
+
         perror("memory not enough\n");
         exit(0);
     }
-    memset(gc.table[gc.n], 0, size);
-    return gc.table[gc.n++];
+
+    memset(m, 0, size);
+
+    gc.table[gc.n++] = m;
+
+    return m;
 
 }

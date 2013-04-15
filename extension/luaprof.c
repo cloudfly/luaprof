@@ -271,7 +271,7 @@ int pf_printr(lua_State *L) {
         }
     }
 
-    sprintf(str, "\nTotal Time : %ld\n", t->table[0]->item->total);
+    sprintf(str, "\nTotal Time : %ld\n", fcvalue(0)->total);
     lua_pushstring(L, str); 
     lua_call(L, c, 0);
 

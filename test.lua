@@ -34,11 +34,8 @@ fibo(5)
 
 profile.stop()
 
-profile.save2dot("/home/cloudfly/work/luaprof/out.dot", "/home/cloudfly/work/luaprof/out.png")
---profile.save2js("./out.js")
-profile.save2txt("./out.txt")
-
 profile.print_result(print);
+
 profile.release()
 
 
