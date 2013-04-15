@@ -9,8 +9,8 @@ Func* get_func(tree* t, const char* name){
     unsigned int i;
     
     for(i = 0; i < t->nfunc; i++) {
-        if (strcmp(name, t->table[i]->item->func_name) == 0)
-            return t->table[i]->item;
+        if (strcmp(name, fcvalue(i)->func_name) == 0)
+            return fcvalue(i);
     }
 
     return (Func*)NULL;
@@ -49,7 +49,7 @@ int add_cld(tree* t, int idx, int cidx) {
 void update_time(tree* t, int idx, Func* f) {
 
     if (idx >= 0 && idx < (int)t->nfunc) {
-        t->table[idx]->item->time = f->time;
-        t->table[idx]->item->total = f->total;
+        fcvalue(idx)->time = f->time;
+        fcvalue(idx)->total = f->total;
     }
 }

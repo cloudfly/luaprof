@@ -9,6 +9,10 @@
 #include"lauxlib.h"
 #include"common.h"
 
+
+/*the gc memory size*/
+#define MSIZE 10000
+
 typedef struct Func{
     char *func_name;    /*function name*/
     char *source;       /*source of function, the file it defined*/
@@ -31,16 +35,11 @@ typedef struct FuncNode{
     Func *item;
 } FuncNode;
 
-typedef struct mem{ 
-    void *table[10000];
+typedef struct Mem{ 
+    void *table[MSIZE];
     unsigned int n;
-} mem;
+} Mem;
 
-char* error;
-mem gc;
-
-
-/*The stack*/
 
 void pf_hook(lua_State *L, lua_Debug *ar);
 int pf_call(lua_Debug *debug);
@@ -52,7 +51,6 @@ int pf_save2js(lua_State *L);
 int pf_save2txt(lua_State *L);
 int pf_printr(lua_State *L);
 int pf_release();
-Func* newFunc();
 
 
 #endif

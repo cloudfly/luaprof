@@ -1,7 +1,9 @@
-
 #include"common.h"
+#include"luaprof.h"
 
-int sameName(const char* a, const char* b) {
+extern Mem gc;
+
+unsigned int sameName(const char* a, const char* b) {
     int a_len = strlen(a);
     int b_len = strlen(b);
 
@@ -13,7 +15,7 @@ int sameName(const char* a, const char* b) {
 }
 
 /* get current system time */
-long gettime()
+unsigned long gettime()
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);

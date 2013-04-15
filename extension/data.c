@@ -1,10 +1,13 @@
 #include"data.h"
 
+char* error;
+
 int data2dot(tree* t, const char *fdot, const char *fpng) {
     unsigned int i;
     child *cld;
-    char *cmd;
+    char cmd[1000];
     FILE *fp = fopen(fdot, "w+");
+    Func *f = NULL;
 
     if ( ! fp) {
         error = "[ERROR]: can not create file\n";
@@ -15,11 +18,12 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
 
     for(i = 0;i < t->nfunc;i++) {
         cld = t->table[i]->children;
+        f = fcvalue(i);
 
         if (cld) {
-            fprintf(fp, "    A%d [label=\"%s %.2f%%\" shape=box];\n", i, t->table[i]->item->func_name, t->table[i]->item->total / (double)t->table[0]->item->total * 100);
+            fprintf(fp, "    A%d [label=\"%s %.2f%%\" shape=box];\n", i, f->func_name, f->total / (double)fcvalue(0)->total * 100);
         } else {
-            fprintf(fp, "    A%d [label=\"%s %.2f%%\"];\n", i, t->table[i]->item->func_name, t->table[i]->item->total / (double)t->table[0]->item->total * 100);
+            fprintf(fp, "    A%d [label=\"%s %.2f%%\"];\n", i, f->func_name, f->total / (double)fcvalue(0)->total * 100);
         }
 
         while(cld) {
@@ -31,12 +35,10 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
     fclose(fp);
 
     if (fpng) {
-        cmd = (char*)lloc(sizeof(char) * (15 + strlen(fdot) + strlen(fpng)));
         sprintf(cmd, CMD_PNG, fpng, fdot);
 
         if(system(cmd) < 0) {
             error = "Failed to generate graph\n";
-            free(cmd);
             return 0;
         }
     }
@@ -50,6 +52,8 @@ int data2text(tree* t, const char* fpath) {
 
     FILE *fp = fopen(fpath, "w+");
 
+    Func *f = NULL;
+
     if ( ! fp) {
         error = "lprof error : Can not open output; ensure the file's limits is 666";
         return 0;
@@ -58,10 +62,11 @@ int data2text(tree* t, const char* fpath) {
     for(i = 0;i < t->nfunc;i++) {
 
         if (t->table[i])
-            fprintf(fp, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", t->table[i]->item->func_name, t->table[i]->item->count, t->table[i]->item->time, t->table[i]->item->time / (double)t->table[0]->item->total * 100, t->table[i]->item->total, t->table[i]->item->total / (double)t->table[0]->item->total * 100, t->table[i]->item->source);
+            f = fcvalue(i);
+            fprintf(fp, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
     }
 
-    fprintf(fp, "\nTotal Time : %ld\n", t->table[0]->item->total);
+    fprintf(fp, "\nTotal Time : %ld\n", fcvalue(0)->total);
     fclose(fp);
     return 1;
 }
@@ -71,7 +76,7 @@ int data2js(tree* t, const char* fpath) {
 
     FILE *fp = fopen(fpath, "w+");
 
-    Func *f;
+    Func *f = NULL;
 
     if ( ! fp) {
         error = "lprof error : Can not open output file";
@@ -83,7 +88,7 @@ int data2js(tree* t, const char* fpath) {
     for(i = 0;i < t->nfunc; i++) {
 
         if (t->table[i]) {
-            f = t->table[i]->item;
+            f = fcvalue(i);
             fprintf(fp, "{name:'%s', source:'%s', type:'%s', line:%d, count:%d, total:%ld, time:%ld },\n", f->func_name, f->source, f->type, f->line, f->count, f->total, f->time);
         }
     }
@@ -91,18 +96,3 @@ int data2js(tree* t, const char* fpath) {
     fclose(fp);
     return 1;
 }
-
-int print_result(tree* t) {
-
-    unsigned int i;
-
-    for(i = 0;i < t->nfunc;i++) {
-
-        if (t->table[i])
-            printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", t->table[i]->item->func_name, t->table[i]->item->count, t->table[i]->item->time, t->table[i]->item->time / (double)t->table[0]->item->total * 100, t->table[i]->item->total, t->table[i]->item->total / (double)t->table[0]->item->total * 100, t->table[i]->item->source);
-    }
-
-    printf("\nTotal Time : %ld\n", t->table[0]->item->total);
-    return 1;
-}
-

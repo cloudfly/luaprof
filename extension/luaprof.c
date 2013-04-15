@@ -2,11 +2,17 @@
 #include"tree.h"
 #include"data.h"
 
+
+#define checkStack(st, m) (((st) && sameName((st)->item->func_name, (m))) ? 1 : 0)
+
+extern char* error;
+Mem gc;
 tree* t;
-unsigned long global_time;
 FuncNode* state = (FuncNode*)NULL;
 
-void pushFunc(Func *item) {
+
+static void pushFunc(Func *item) {
+
     FuncNode* tmp;
 
     if (state) {
@@ -24,15 +30,18 @@ void pushFunc(Func *item) {
             tmp->item->recursive = state->item->recursive + 1;
 
         state = tmp;
+
     } else {
+
         state = (FuncNode*)lloc(sizeof(FuncNode));
         state->pre = (FuncNode*)NULL;
         state->next = (FuncNode*)NULL;
         state->item = item;
     }
+
 }
 
-Func* popFunc() {
+static Func* popFunc() {
     int now = gettime();
     Func* tmp;
 
@@ -60,12 +69,8 @@ Func* popFunc() {
 }
 
 
-int checkStack(const char* name) {
-    return (state && sameName(state->item->func_name, name)) ? 1 : 0 ;
-}
-
 /*add the function into data array, cld : whether this func is a child, every function is child except main()*/
-void recordFunc(Func* item, int cld){
+static void recordFunc(Func* item, int cld){
     Func *res, *prt;
     char* str;
 
@@ -108,7 +113,7 @@ void recordFunc(Func* item, int cld){
     }
 }
 
-Func* newFunc(){
+static Func* newFunc(){
     Func* f;
 
     f = (Func*)lloc(sizeof(Func));
@@ -134,6 +139,8 @@ void pf_hook(lua_State *L, lua_Debug *ar)
     case LUA_HOOKRET:
         pf_ret(ar);
             break;
+    default:
+            break;
     }
 }
 
@@ -142,7 +149,7 @@ int pf_call(lua_Debug *debug)
 
     Func *res;
 
-    if ( ! debug || ! debug->name || *(debug->what) == 'C') return 0;
+    if ( ! debug || ! debug->name || *debug->what == 'C') return 0;
 
     res = newFunc();
 
@@ -165,9 +172,8 @@ int pf_call(lua_Debug *debug)
 
 int pf_ret(lua_Debug *debug)
 {
-    if ( ! debug || ! debug->name) return 0;
 
-    if ( ! checkStack(debug->name)) return 0;   /*check if the stack top have the function named debug->name */
+    if ( ! (debug && debug->name && checkStack(state, debug->name)) ) return 0;   /*check if the stack top have the function named debug->name */
 
     popFunc();
 
@@ -205,7 +211,6 @@ int pf_stop(lua_State *L)
     item = popFunc();
 
     while(item) {
-        global_time = item->total;
         item = popFunc();
     }
 
@@ -248,14 +253,20 @@ int pf_save2txt(lua_State *L) {
 int pf_printr(lua_State *L) {
 
     unsigned int i, c = 1;
-    char str[1000];
+    char str[TXT_L];
+    Func *f;
+
+    if( ! lua_isfunction(L, -1)) {
+        luaL_error(L, "the arg should be a function\n");
+    }
 
     lua_checkstack(L, t->nfunc);
 
     for(i = 0;i < t->nfunc;i++) {
 
         if (t->table[i]) {
-            sprintf(str, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", t->table[i]->item->func_name, t->table[i]->item->count, t->table[i]->item->time, t->table[i]->item->time / (double)t->table[0]->item->total * 100, t->table[i]->item->total, t->table[i]->item->total / (double)t->table[0]->item->total * 100, t->table[i]->item->source);
+            f = fcvalue(i);
+            sprintf(str, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
             lua_pushstring(L, str); c++; memset(str, 0, sizeof(str));
         }
     }

@@ -35,4 +35,7 @@ int add_cld(tree* t, int idx, int cidx);
 
 void update_time(tree* t, int idx, Func* f);
 
+/*get a func from tree by index*/
+#define fcvalue(i) (t->table[(i)]->item)
+
 #endif
