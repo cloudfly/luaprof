@@ -1,20 +1,36 @@
+LUAINC = /usr/local/lua/include/
 
+LUALIB = /usr/local/lib/lua/5.1/
 
-LUAINC= /usr/local/lua/include
+OUT = luaprof.so
 
-OUT= luaprof.so
-
-CC= gcc
+############################################
 
 WARN= -fPIC -pedantic -Wall -W
-INCS= -I$(LUAINC)
 
-CFLAGS= $(INCS) $(WARN) -O2  
+CFLAGS= -I$(LUAINC) $(WARN) -O2
 
-profile: 
-	$(CC) -shared -o $(OUT) $(CFLAGS) -I./ luaprof.c common.c tree.c data.c
-	cp luaprof.so ../
+CC = gcc -c $(CFLAGS)
+
+FILEO = luaprof.o common.o tree.o data.o
+
+profile: $(FILEO)
+	gcc -shared -o luaprof.so $(FILEO)
+
+luaprof.o: luaprof.c luaprof.h
+	$(CC) -o luaprof.o luaprof.c
+common.o: common.c common.h
+	$(CC) -o common.o common.c
+tree.o: tree.c tree.h
+	$(CC) -o tree.o tree.c
+data.o: data.c data.h
+	$(CC) -o data.o data.c
+
+install:
+	cp $(OUT) ../
+	mv $(OUT) $(LUALIB)
 
 clean:
-	rm -f ../*.txt ../*.png ../*.js ../*.dot ../*.so *.so
+	rm -f *.o *.so
+	rm -f ../*.txt ../*.png ../*.js ../*.dot ../*.so 
 
