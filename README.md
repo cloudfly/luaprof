@@ -22,6 +22,18 @@ stop the luaprof
 ###output()
 write the data into the file, which you assigned before in the function luaprof.start()
 
+###release()
+release the memory using by luaprof
+
+###save2dot(dfile, pfile)
+generate dot code, write into dfile. if pfile is given, it will generate a png image by calling `dot` command
+
+###save2js(jfile)
+generate javascript code, saving into jfile
+
+###save2txt(tfile)
+save data into a text file
+
 ##Example
 see test.lua
 
@@ -50,7 +62,13 @@ profile.start("/home/cloudfly/work/logs/test_prof.out")
 test()
 
 profile.stop()
-profile.output()
+
+
+profile.save2dot("./data.dot", "./data.png")
+profile.save2js("./data.js")
+profile.save2txt("./data.txt")
+
+profile.release()
 ```
 
 
