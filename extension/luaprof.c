@@ -252,28 +252,18 @@ int pf_save2txt(lua_State *L) {
 
 int pf_printr(lua_State *L) {
 
-    unsigned int i, c = 1;
-    char str[TXT_L];
+    unsigned int i;
     Func *f;
-
-    if( ! lua_isfunction(L, -1)) {
-        luaL_error(L, "the arg should be a function\n");
-    }
-
-    lua_checkstack(L, t->nfunc);
 
     for(i = 0;i < t->nfunc;i++) {
 
         if (t->table[i]) {
             f = fcvalue(i);
-            sprintf(str, "%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
-            lua_pushstring(L, str); c++; memset(str, 0, sizeof(str));
+            printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
         }
     }
 
-    sprintf(str, "\nTotal Time : %ld\n", fcvalue(0)->total);
-    lua_pushstring(L, str); 
-    lua_call(L, c, 0);
+    printf("\nTotal Time : %ld\n", fcvalue(0)->total);
 
     return 0;
 }

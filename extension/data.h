@@ -8,6 +8,5 @@ int data2text(tree* t, const char* fpath);
 int data2js(tree* t, const char* fpath);
 
 #define CMD_PNG "dot -Tpng -o %s %s"
-#define TXT_L 1000
 
 #endif

@@ -32,5 +32,3 @@ install:
 
 clean:
 	rm -f *.o *.so
-	rm -f ../*.txt ../*.png ../*.js ../*.dot ../*.so 
-
