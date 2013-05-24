@@ -137,6 +137,7 @@ void pf_hook(lua_State *L, lua_Debug *ar)
         pf_call(ar);
             break;
     case LUA_HOOKRET:
+    case LUA_HOOKTAILRET:
         pf_ret(ar);
             break;
     default:
@@ -173,7 +174,8 @@ int pf_call(lua_Debug *debug)
 int pf_ret(lua_Debug *debug)
 {
 
-    if ( ! (debug && debug->name && checkStack(state, debug->name)) ) return 0;   /*check if the stack top have the function named debug->name */
+    if ( ! debug || *debug->what == 'C') return 0;
+    /*if ( ! (debug && debug->name && checkStack(state, debug->name)) ) return 0;   *//*check if the stack top have the function named debug->name */
 
     popFunc();
 
