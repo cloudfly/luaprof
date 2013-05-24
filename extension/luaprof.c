@@ -174,6 +174,7 @@ int pf_call(lua_Debug *debug)
 int pf_ret(lua_Debug *debug)
 {
 
+    /**/
     if ( ! debug || *debug->what == 'C') return 0;
     /*if ( ! (debug && debug->name && checkStack(state, debug->name)) ) return 0;   *//*check if the stack top have the function named debug->name */
 
