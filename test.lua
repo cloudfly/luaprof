@@ -2,40 +2,39 @@ local profile = require"luaprof"
 
 local str = ""
 
-function fibo(n)
-
-    if n < 3 then
-        return 1
-    else
-        return fibo(n - 1) + fibo(n - 2)
+function sum(c){
+    local s = 0
+    for i = 0, c do
+        s = s + 1
     end
-end
-
+    return s;
+}
 function test1()
-    for i = 1,500,2 do
+
+    for i = 1,500,1 do
         str = str .. i
     end
-    fibo(4)
+    print(str)
 end
 
 function test2()
-    local a = 0;
-    test1()
-    for i = 1, 1000000, 1 do
-        a = a + 1
+
+    local t = {};
+    for i = 1, 500, 1 do
+        table.insert(t, i)
     end
+    print(table.concat(t))
 end
 
 profile.start("./out_test2")
 
 test2()
 test1()
-fibo(5)
 
 profile.stop()
 
-profile.print_result(print);
+profile.save2dot("/home/cloudfly/data.dot", "/home/cloudfly/data.png");
+
+profile.printr();
 
 profile.release()
-
-
