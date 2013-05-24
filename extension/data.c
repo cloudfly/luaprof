@@ -8,6 +8,8 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
     char cmd[1000];
     FILE *fp = fopen(fdot, "w+");
     Func *f = NULL;
+    int r, g;
+    double rate;
 
     if ( ! fp) {
         error = "[ERROR]: can not create file\n";
@@ -19,11 +21,33 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
     for(i = 0;i < t->nfunc;i++) {
         cld = t->table[i]->children;
         f = fcvalue(i);
+        rate = f->total / (float)fcvalue(0)->total;
+
+        if (rate < 0.5) {
+            r = 0xff * rate * 2;
+            g = 0xcc;
+        } else {
+            r = 0xff;
+            g = 0xcc * (1 - rate) * 2;
+        }
 
         if (cld) {
-            fprintf(fp, "    A%d [label=\"%s %.2f%%\" shape=box];\n", i, f->func_name, f->total / (double)fcvalue(0)->total * 100);
+            fprintf(fp, 
+                    "    A%d [label=\"%s %.2f%%\" shape=box style = \"filled, rounded\" color = \"#%02x%02x00\"];\n", 
+                    i, 
+                    f->func_name, 
+                    rate * 100,
+                    (int)r,
+                    (int)g
+                    );
         } else {
-            fprintf(fp, "    A%d [label=\"%s %.2f%%\"];\n", i, f->func_name, f->total / (double)fcvalue(0)->total * 100);
+            fprintf(fp, "    A%d [label=\"%s %.2f%%\" style = \"filled\" color = \"#%02x%02x00\"];\n", 
+                    i, 
+                    f->func_name, 
+                    rate * 100,
+                    (int)r,
+                    (int)g
+                    );
         }
 
         while(cld) {
