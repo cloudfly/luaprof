@@ -59,7 +59,6 @@ FuncNode *sort(tree* t) {
     FuncNode *tmp, *tmp2, *array = illoc(FuncNode, 1);
     array->item = t->table[0]->item;
     array->pre = array->next = NULL;
-    printf("in sort function\n");
     
     for(i = 1; i < t->nfunc; i++) {
         tmp = array;
@@ -100,15 +99,6 @@ FuncNode *sort(tree* t) {
         }
 
     }
-
-    /*test begin*/
-    tmp = array;
-
-    while(tmp) {
-        printf("%s(%lu)->", tmp->item->func_name, tmp->item->total);
-        tmp = tmp->next;
-    }
-    /*test end*/
 
     return array;
 }

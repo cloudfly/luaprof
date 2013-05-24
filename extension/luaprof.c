@@ -252,18 +252,17 @@ int pf_save2txt(lua_State *L) {
 
 int pf_printr(lua_State *L) {
 
-    unsigned int i;
+    FuncNode *slist = sort(t);
+    FuncNode *tmp = slist;
     Func *f;
 
-    for(i = 0;i < t->nfunc;i++) {
-
-        if (t->table[i]) {
-            f = fcvalue(i);
-            printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
-        }
+    while(tmp) {
+        f = tmp->item;
+        printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
+        tmp = tmp->next;
     }
 
-    printf("\nTotal Time : %ld\n", fcvalue(0)->total);
+    printf("\nTotal Time : %ld\n", slist->item->total);
 
     return 0;
 }
@@ -289,7 +288,7 @@ static const struct luaL_Reg lib[] = {
     {"save2dot", pf_save2dot},
     {"save2js", pf_save2js},
     {"save2txt", pf_save2txt},
-    {"print_result", pf_printr},
+    {"printr", pf_printr},
     {"release", pf_release},
     {NULL, NULL}
 };
