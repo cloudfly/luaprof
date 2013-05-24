@@ -53,3 +53,62 @@ void update_time(tree* t, int idx, Func* f) {
         fcvalue(idx)->total = f->total;
     }
 }
+
+FuncNode *sort(tree* t) {
+    unsigned int i;
+    FuncNode *tmp, *tmp2, *array = illoc(FuncNode, 1);
+    array->item = t->table[0]->item;
+    array->pre = array->next = NULL;
+    printf("in sort function\n");
+    
+    for(i = 1; i < t->nfunc; i++) {
+        tmp = array;
+
+        while(1){
+
+            if (tmp->item->total > fcvalue(i)->total) {
+
+                if (tmp->next) {
+                    tmp = tmp->next;
+                    continue;
+                } else {
+                    break;
+                }
+
+            } else {
+                tmp2 = illoc(FuncNode, 1);
+                tmp2->item = fcvalue(i);
+                tmp2->next = tmp;
+                tmp->pre = tmp->pre;
+                tmp->pre->next = tmp2;
+                tmp->pre = tmp2; 
+
+                if(tmp == array){
+                    array = tmp;
+                }
+                tmp = tmp2;
+                break;
+            }
+        }
+        
+        if ( ! tmp->next) {
+            tmp2 = illoc(FuncNode, 1);
+            tmp2->item = fcvalue(i);
+            tmp2->pre = tmp; 
+            tmp2->next = NULL;
+            tmp->next = tmp2;
+        }
+
+    }
+
+    /*test begin*/
+    tmp = array;
+
+    while(tmp) {
+        printf("%s(%lu)->", tmp->item->func_name, tmp->item->total);
+        tmp = tmp->next;
+    }
+    /*test end*/
+
+    return array;
+}

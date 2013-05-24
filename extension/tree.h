@@ -35,6 +35,13 @@ int add_cld(tree* t, int idx, int cidx);
 
 void update_time(tree* t, int idx, Func* f);
 
+/* 
+ * sort the tree by func->total, ignore the parent-child relation
+ * return a sorted array, but the array already disordered
+ */
+/* sort tree by flag */
+FuncNode* sort(tree* t);
+
 /*get a func from tree by index*/
 #define fcvalue(i) (t->table[(i)]->item)
 
