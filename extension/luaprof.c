@@ -250,15 +250,28 @@ int pf_save2txt(lua_State *L) {
     return 0;
 }
 
-int pf_printr() {
+int pf_printr(lua_State *L) {
 
+    unsigned int i = 0;
     FuncNode *slist = sort(t);
     FuncNode *tmp = slist;
     Func *f;
 
+    unsigned int count = (unsigned int)(lua_isnumber(L, 1)?luaL_checknumber(L, 1):SCOUNT);
+
+    if (count > t->nfunc) count = t->nfunc;
+
     while(tmp) {
         f = tmp->item;
-        printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", f->func_name, f->count, f->time, f->time / (double)fcvalue(0)->total * 100, f->total, f->total / (double)fcvalue(0)->total * 100, f->source);
+        printf("%-32s%-10d%-15ld%-4.2f%%  %-15ld%.2f%%   [%s]\n", 
+                f->func_name, 
+                f->count, 
+                f->time, 
+                f->time / (double)fcvalue(0)->total * 100, 
+                f->total, 
+                f->total / (double)fcvalue(0)->total * 100, 
+                f->source);
+        if(++i == count) break;
         tmp = tmp->next;
     }
 

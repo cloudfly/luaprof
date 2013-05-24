@@ -5,6 +5,7 @@
 #include"luaprof.h"
 
 #define MAX 1000
+#define SCOUNT 10
 
 typedef struct child {
     unsigned int index;
