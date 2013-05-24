@@ -20,7 +20,7 @@ static void pushFunc(Func *item) {
         state->item->net_end = gettime();
         state->item->time += state->item->net_end - state->item->net_begin; /*save the time data of the stack's top function*/
 
-        tmp = (FuncNode*)lloc(sizeof(FuncNode));
+        tmp = illoc(FuncNode, 1);
         tmp->item = item;
         tmp->pre = state;
         tmp->next = (FuncNode*)NULL;
@@ -33,7 +33,7 @@ static void pushFunc(Func *item) {
 
     } else {
 
-        state = (FuncNode*)lloc(sizeof(FuncNode));
+        state = illoc(FuncNode, 1);
         state->pre = (FuncNode*)NULL;
         state->next = (FuncNode*)NULL;
         state->item = item;
@@ -76,10 +76,10 @@ static void recordFunc(Func* item, int cld){
 
     if (item->recursive > 0) {
         /*sprintf function can get the Bit count of a integer. use stdin to prevent printing content on the screen*/
-        str = (char*)lloc(sizeof(char) * (strlen(item->func_name) + sprintf((char*)stdin, "%d", item->recursive) + 2));
+        str = illoc(char, strlen(item->func_name) + sprintf((char*)stdin, "%d", item->recursive) + 2);
         sprintf(str, "%s@%d", item->func_name, item->recursive);
     } else {
-        str = (char*)lloc(sizeof(char) * strlen(item->func_name));
+        str = illoc(char, strlen(item->func_name));
         sprintf(str, "%s", item->func_name);
     }
 
@@ -116,7 +116,7 @@ static void recordFunc(Func* item, int cld){
 static Func* newFunc(){
     Func* f;
 
-    f = (Func*)lloc(sizeof(Func));
+    f = illoc(Func, 1);
     f->count = 1;
     f->line = -1;
     f->recursive = 0;
@@ -153,9 +153,9 @@ int pf_call(lua_Debug *debug)
 
     res = newFunc();
 
-    res->func_name = (char *)lloc(strlen(debug->name));
-    res->source = (char *)lloc(strlen(debug->short_src));
-    res->type = (char *)lloc(strlen(debug->what));
+    res->func_name = illoc(char, strlen(debug->name));
+    res->source = illoc(char, strlen(debug->short_src));
+    res->type = illoc(char, strlen(debug->what));
     strcpy(res->func_name, debug->name);
     strcpy(res->source, debug->short_src);
     strcpy(res->type, debug->what);
@@ -185,14 +185,14 @@ int pf_start(lua_State *L)
     Func* _main;
     gc.n = 0;
 
-    t = (tree*)lloc(sizeof(tree));
+    t = illoc(tree, 1);
     memset(t->table, 0, sizeof(t->table));
     t->nfunc = 0;
     lua_sethook(L, (lua_Hook)pf_hook, LUA_MASKCALL | LUA_MASKRET, 0);
 
     _main = newFunc();
 
-    _main->func_name = (char *)lloc(sizeof(char) * 7);
+    _main->func_name = illoc(char, 7);
     _main->source = (char *)NULL;
     _main->type = (char *)NULL;
     strcpy(_main->func_name, "main()");
@@ -250,7 +250,7 @@ int pf_save2txt(lua_State *L) {
     return 0;
 }
 
-int pf_printr(lua_State *L) {
+int pf_printr() {
 
     FuncNode *slist = sort(t);
     FuncNode *tmp = slist;

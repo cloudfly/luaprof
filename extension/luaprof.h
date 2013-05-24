@@ -49,7 +49,7 @@ int pf_stop(lua_State *L);
 int pf_save2dot(lua_State *L);
 int pf_save2js(lua_State *L);
 int pf_save2txt(lua_State *L);
-int pf_printr(lua_State *L);
+int pf_printr();
 int pf_release();
 
 
