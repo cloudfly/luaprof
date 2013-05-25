@@ -46,11 +46,44 @@ int add_cld(tree* t, int idx, int cidx) {
     return 0;
 }
 
+void add_log(tree*t, unsigned int idx, int p, unsigned int time) {
+
+    FuncTreeNode *n;
+    Log *l;
+    int i, j;
+
+    if (idx < t->nfunc) {
+        n = t->table[idx];
+        i = n->item->count - 1;
+
+        if (i < 20) {
+            l = &(n->logs[i]);
+            l->p = p;
+            l->time = time;
+        } else {
+            l = &(n->logs[0]);
+
+            for (j = 1; j < LOGCOUNT; j++) {
+
+                if (n->logs[j].time < l->time) {
+                    l = &(n->logs[j]);
+                }
+            }
+            l->p = p;
+            l->time = time;
+        }
+    }
+}
+
 void update_time(tree* t, int idx, Func* f) {
 
     if (idx >= 0 && idx < (int)t->nfunc) {
         fcvalue(idx)->time = f->time;
         fcvalue(idx)->total = f->total;
+
+        /*TODO:
+         *update logs, first should check if log's count > 20, true then replace the least time cost function, false then add it directly
+         */
     }
 }
 

@@ -44,6 +44,7 @@ static void pushFunc(Func *item) {
 static Func* popFunc() {
     int now = gettime();
     Func* tmp;
+    int p = -1; /* index of now poping function's parent */
 
     if (state) {
         tmp = state->item;
@@ -56,10 +57,12 @@ static Func* popFunc() {
         if (state) {
             state->next = (FuncNode*)NULL;
             state->item->net_begin = now;   /*reset the net-time's begin data of the stack-top function*/
+            p = state->item->index;
         }
 
         /*give running data to tree*/
-        update_time(t, tmp->index, tmp);
+        update_time(t, tmp->index, tmp); 
+        add_log(t, tmp->index, p, tmp->end - tmp->begin);
 
         return tmp;
 
@@ -130,7 +133,7 @@ static Func* newFunc(){
 void pf_hook(lua_State *L, lua_Debug *ar)
 {
 
-    lua_getinfo(L, "nS", ar);
+    lua_getinfo(L, "nlS", ar);
 
     switch(ar->event) {
     case LUA_HOOKCALL:
@@ -283,6 +286,19 @@ int pf_printr(lua_State *L) {
     return 0;
 }
 
+int pf_test() {
+    
+    unsigned int i;
+    int j;
+    for(i = 0; i < t->nfunc; i++) {
+        printf("%s:\n", t->table[i]->item->func_name);
+        for(j = 0; j < t->table[i]->item->count; j++) {
+            printf("    %u, %u\n", t->table[i]->logs[j].p,t->table[i]->logs[j].time);
+        }
+    }
+    return 0;
+}
+
 int pf_release() {
 
     unsigned int i;
@@ -306,6 +322,7 @@ static const struct luaL_Reg lib[] = {
     {"save2txt", pf_save2txt},
     {"printr", pf_printr},
     {"release", pf_release},
+    {"test", pf_test},
     {NULL, NULL}
 };
 

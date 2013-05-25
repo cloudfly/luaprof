@@ -4,8 +4,9 @@
 
 #include"luaprof.h"
 
-#define MAX 1000
+#define MAX 10000
 #define SCOUNT 10
+#define LOGCOUNT 20
 
 typedef struct child {
     unsigned int index;
@@ -13,10 +14,16 @@ typedef struct child {
     struct child* next;
 } child;
 
+typedef struct Log{
+    int p;
+    unsigned int time;
+} Log;
+
 /*tree node, store the function info*/
 
 typedef struct FuncTreeNode {
     Func* item;
+    Log logs[LOGCOUNT];
     child* children;
 } FuncTreeNode;
 
@@ -33,6 +40,8 @@ Func* get_func(tree* t, const char* name);
 void add_func(tree* t, Func* item);
 
 int add_cld(tree* t, int idx, int cidx);
+
+void add_log(tree*t, unsigned int idx, int p, unsigned int time);
 
 void update_time(tree* t, int idx, Func* f);
 

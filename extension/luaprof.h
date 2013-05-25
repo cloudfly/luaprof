@@ -11,17 +11,19 @@
 
 
 /*the gc memory size*/
-#define MSIZE 10000
+#define MSIZE 100000
+
 
 typedef struct Func{
-    char *func_name;    /*function name*/
-    char *source;       /*source of function, the file it defined*/
-    char *type;         /*type of function;Lua | C | main*/
-    unsigned int line;           /*the line number of the function defined*/
-    unsigned int count;          /*count that the function has been called*/
-    unsigned int recursive;       /*deep of recursive call*/
-    unsigned long total;          /*time of the function total cost*/
-    unsigned long time;           /*net time of the function cost*/
+    char *func_name;    /* function name */
+    char *source;       /* source of function, the file it defined */
+    char *type;         /* type of function;Lua | C | main */
+    unsigned int line;           /* the line number of the function defined */
+    unsigned int cline;         /* current line, the linenumber function be called */
+    int count;          /* count that the function has been called, -1 for unknown */
+    unsigned int recursive;       /* deep of recursive call */
+    unsigned long total;          /* time of the function total cost */
+    unsigned long time;           /* net time of the function cost */
     unsigned long net_begin;
     unsigned long net_end;
     unsigned long begin;
@@ -50,6 +52,7 @@ int pf_save2dot(lua_State *L);
 int pf_save2js(lua_State *L);
 int pf_save2txt(lua_State *L);
 int pf_printr(lua_State *L);
+int pf_test();
 int pf_release();
 
 
