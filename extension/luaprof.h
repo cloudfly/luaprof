@@ -11,7 +11,7 @@
 
 
 /*the gc memory size*/
-#define MSIZE 100000
+#define MSIZE 1000
 
 
 typedef struct Func{

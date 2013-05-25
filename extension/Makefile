@@ -16,6 +16,7 @@ FILEO = luaprof.o common.o tree.o data.o
 
 profile: $(FILEO)
 	gcc -shared -o luaprof.so $(FILEO)
+	cp $(OUT) ../
 
 luaprof.o: luaprof.c luaprof.h
 	$(CC) -o luaprof.o luaprof.c
@@ -27,7 +28,6 @@ data.o: data.c data.h
 	$(CC) -o data.o data.c
 
 install:
-	cp $(OUT) ../
 	mv $(OUT) $(LUALIB)
 
 clean:

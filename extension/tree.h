@@ -4,9 +4,9 @@
 
 #include"luaprof.h"
 
-#define MAX 10000
+#define MAX 1000
 #define SCOUNT 10
-#define LOGCOUNT 20
+#define LOGCOUNT 10
 
 typedef struct child {
     unsigned int index;

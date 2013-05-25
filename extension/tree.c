@@ -80,10 +80,6 @@ void update_time(tree* t, int idx, Func* f) {
     if (idx >= 0 && idx < (int)t->nfunc) {
         fcvalue(idx)->time = f->time;
         fcvalue(idx)->total = f->total;
-
-        /*TODO:
-         *update logs, first should check if log's count > 20, true then replace the least time cost function, false then add it directly
-         */
     }
 }
 
