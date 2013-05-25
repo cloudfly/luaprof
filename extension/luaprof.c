@@ -166,11 +166,12 @@ int pf_call(lua_Debug *debug)
 
     res->line = debug->linedefined;
 
-    res->begin = res->net_begin = gettime();
 
     /*can not change the order of two line below, pushFunc can set the recursive to res, then recordFunc use recursive to record function*/
     pushFunc(res);
     recordFunc(res, 1);
+    res->begin = res->net_begin = gettime();
+
     return 1;
 }
 
@@ -203,10 +204,10 @@ int pf_start(lua_State *L)
     _main->type = (char *)NULL;
     strcpy(_main->func_name, "main()");
 
-    _main->net_begin = _main->begin = gettime();
 
     pushFunc(_main);
     recordFunc(_main, 0);
+    _main->net_begin = _main->begin = gettime();
     return 0;
 }
 
