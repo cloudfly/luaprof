@@ -34,11 +34,18 @@ printf("%-20s%-20s\n", "pushFunc", item->func_name);
 
         if (sameName(state->item->func_name, item->func_name)) {   /*if is recursive call, add the recursion's depth*/
             tmp->item->recursive = state->item->recursive + 1;
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sRecursive %d\n", "pushFunc", item->func_name, tmp->item->recursive);
+#endif
         }
 
         state = tmp;
 
     } else {
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sNewStack\n", "pushFunc", item->func_name);
+#endif
 
         state = illoc(FuncNode, 1);
         state->pre = (FuncNode*)NULL;
@@ -224,6 +231,9 @@ int pf_start(lua_State *L)
     t->nfunc = 0;
     lua_sethook(L, (lua_Hook)pf_hook, LUA_MASKCALL | LUA_MASKRET, 0);
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s\n", "pf_start");
+#endif
     _main = newFunc();
 
     _main->func_name = illoc(char, 7);

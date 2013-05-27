@@ -9,31 +9,44 @@ Func* get_func(tree* t, const char* name){
     unsigned int i;
 
     
-#ifdef LUAPROF_DEBUG
-printf("%-20s%-20s\n", "get_func", name);
-#endif
     for(i = 0; i < t->nfunc; i++) {
         if (strcmp(name, fcvalue(i)->func_name) == 0) {
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sGetit\n", "get_func", name);
+#endif
             return fcvalue(i);
         }
     }
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sGetNothing\n", "get_func", name);
+#endif
     return (Func*)NULL;
 }
 
 /*add function, return index of new func*/
 void add_func(tree* t, Func* f){
 
-    FuncTreeNode* nnode = illoc(FuncTreeNode, 1);
+    FuncTreeNode* nnode;
 
+    if(t->nfunc >= MAX) {
 #ifdef LUAPROF_DEBUG
-printf("%-20s%-20sPosition %d\n", "add_func", f->func_name, t->nfunc);
+printf("%-20s%-20sTreeFull\n", "add_func", f->func_name);
 #endif
+        perror("The tree is full");
+        exit(0);
+    }
+
+    nnode = illoc(FuncTreeNode, 1);
 
     f->index = t->nfunc;
     nnode->item = f;
     nnode->children = (child*)NULL;
     t->table[t->nfunc++] = nnode;
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sPosition %d\n", "add_func", f->func_name, t->nfunc);
+#endif
 }
 
 int add_cld(tree* t, int idx, int cidx) {
@@ -53,6 +66,10 @@ printf("%-20s%-20s%-20s\n", "add_cld", fcvalue(idx)->func_name, fcvalue(cidx)->f
         iter = iter->next;
     }
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s%-20s\n", "add_cld", fcvalue(idx)->func_name, fcvalue(cidx)->func_name);
+#endif
+
     /*child not exist, create new one */
     iter = illoc(child, 1);
     iter->index = cidx; iter->count = 1; iter->next = f->children;
@@ -65,6 +82,9 @@ void add_log(tree*t, unsigned int idx, int p, unsigned int time) {
     FuncTreeNode *n;
     Log *l;
     int i, j;
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s\n", "add_log", fcvalue(idx)->func_name);
+#endif
 
     if (idx < t->nfunc) {
         n = t->table[idx];

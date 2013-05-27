@@ -67,6 +67,9 @@ printf("%-20s%25s%25s\n", "data2dot", fdot, fpng);
     if (fpng) {
         sprintf(cmd, CMD_PNG, fpng, fdot);
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s%25s\n", "data2dot", "GeneratePngByDot");
+#endif
         if(system(cmd) < 0) {
             error = "Failed to generate graph\n";
             return 0;
