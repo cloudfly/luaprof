@@ -5,6 +5,7 @@
 #include<stdio.h>
 #include<unistd.h>
 #include<string.h>
+#include<stdarg.h>
 #include"lua.h"
 #include"lauxlib.h"
 #include"common.h"
@@ -12,7 +13,7 @@
 
 /*the gc memory size*/
 #define MSIZE 1000
-
+#define LUAPROF_DEBUG
 
 typedef struct Func{
     char *func_name;    /* function name */
@@ -37,7 +38,7 @@ typedef struct FuncNode{
     Func *item;
 } FuncNode;
 
-typedef struct Mem{ 
+typedef struct Mem { 
     void *table[MSIZE];
     unsigned int n;
 } Mem;

@@ -1,3 +1,5 @@
+#include<sys/types.h>
+#include<sys/stat.h>
 #include"luaprof.h"
 #include"tree.h"
 #include"data.h"
@@ -10,9 +12,14 @@ Mem gc;
 tree* t;
 FuncNode* state = (FuncNode*)NULL;
 
+
 static void pushFunc(Func *item) {
 
     FuncNode* tmp;
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s\n", "pushFunc", item->func_name);
+#endif
 
     if (state) {
 
@@ -25,8 +32,9 @@ static void pushFunc(Func *item) {
         tmp->next = (FuncNode*)NULL;
         state->next = tmp;
 
-        if (sameName(state->item->func_name, item->func_name))   /*if is recursive call, add the recursion's depth*/
+        if (sameName(state->item->func_name, item->func_name)) {   /*if is recursive call, add the recursion's depth*/
             tmp->item->recursive = state->item->recursive + 1;
+        }
 
         state = tmp;
 
@@ -45,6 +53,7 @@ static Func* popFunc() {
     Func* tmp;
     int p = -1; /* index of now poping function's parent */
 
+
     if (state) {
         tmp = state->item;
         tmp->net_end = tmp->end = now;
@@ -52,6 +61,10 @@ static Func* popFunc() {
         tmp->total += tmp->end - tmp->begin;
 
         state = state->pre;
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s\n", "popFunc", tmp->func_name);
+#endif
 
         if (state) {
             state->next = (FuncNode*)NULL;
@@ -84,6 +97,10 @@ static void recordFunc(Func* item, int cld){
         str = illoc(char, strlen(item->func_name));
         sprintf(str, "%s", item->func_name);
     }
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s\n", "recordFunc", str);
+#endif
 
     /*get func in tree.*/
     res = get_func(t, str);
@@ -118,6 +135,9 @@ static void recordFunc(Func* item, int cld){
 static Func* newFunc(){
     Func* f;
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s\n", "newFunc");
+#endif
     f = illoc(Func, 1);
     f->count = 1;
     f->line = -1;
@@ -156,6 +176,10 @@ int pf_call(lua_Debug *debug)
 
     res = newFunc();
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s\n", "pf_call", debug->name);
+#endif
+
     res->func_name = illoc(char, strlen(debug->name));
     res->source = illoc(char, strlen(debug->short_src));
     res->type = illoc(char, strlen(debug->what));
@@ -179,6 +203,9 @@ int pf_ret(lua_Debug *debug)
 
     if ( ! debug || *debug->what == 'C') return 0;
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s\n", "pf_ret");
+#endif
     popFunc();
 
     return 1;
@@ -188,6 +215,9 @@ int pf_start(lua_State *L)
 {
     Func* _main;
     gc.n = 0;
+
+    /* change the mask of creating file */
+    umask(S_IXUSR | S_IXGRP | S_IXOTH);
 
     t = illoc(tree, 1);
     memset(t->table, 0, sizeof(t->table));
@@ -214,11 +244,17 @@ int pf_stop(lua_State *L)
 
     item = popFunc();
 
+
     while(item) {
         item = popFunc();
     }
 
     lua_sethook(L, NULL, 0, 0);
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s\n", "pf_stop");
+#endif
+
     return 0;
 }
 

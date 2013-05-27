@@ -7,10 +7,15 @@
  */
 Func* get_func(tree* t, const char* name){
     unsigned int i;
+
     
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s\n", "get_func", name);
+#endif
     for(i = 0; i < t->nfunc; i++) {
-        if (strcmp(name, fcvalue(i)->func_name) == 0)
+        if (strcmp(name, fcvalue(i)->func_name) == 0) {
             return fcvalue(i);
+        }
     }
 
     return (Func*)NULL;
@@ -20,6 +25,11 @@ Func* get_func(tree* t, const char* name){
 void add_func(tree* t, Func* f){
 
     FuncTreeNode* nnode = illoc(FuncTreeNode, 1);
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sPosition %d\n", "add_func", f->func_name, t->nfunc);
+#endif
+
     f->index = t->nfunc;
     nnode->item = f;
     nnode->children = (child*)NULL;
@@ -29,6 +39,10 @@ void add_func(tree* t, Func* f){
 int add_cld(tree* t, int idx, int cidx) {
     FuncTreeNode* f = t->table[idx];
     child* iter = f->children;
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20s%-20s\n", "add_cld", fcvalue(idx)->func_name, fcvalue(cidx)->func_name);
+#endif
 
     while(iter) {
 
@@ -77,6 +91,9 @@ void add_log(tree*t, unsigned int idx, int p, unsigned int time) {
 
 void update_time(tree* t, int idx, Func* f) {
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-20sPosition %lu\n", "update_time", f->func_name, f->total);
+#endif
     if (idx >= 0 && idx < (int)t->nfunc) {
         fcvalue(idx)->time = f->time;
         fcvalue(idx)->total = f->total;

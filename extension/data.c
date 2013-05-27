@@ -1,5 +1,3 @@
-#include<sys/types.h>
-#include<sys/stat.h>
 #include"data.h"
 
 char* error;
@@ -12,6 +10,10 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
     Func *f = NULL;
     int r, g;
     double rate;
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%25s%25s\n", "data2dot", fdot, fpng);
+#endif
 
     openfile(fp, fdot);
 
@@ -82,6 +84,10 @@ int data2text(tree* t, const char* fpath) {
 
     Func *f = NULL;
 
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-25s\n", "data2text", fpath);
+#endif
+
     openfile(fp, fpath);
 
     if ( ! fp) {
@@ -107,6 +113,10 @@ int data2js(tree* t, const char* fpath) {
     FILE *fp;
 
     Func *f = NULL;
+
+#ifdef LUAPROF_DEBUG
+printf("%-20s%-25s\n", "data2js", fpath);
+#endif
 
     openfile(fp, fpath);
 
