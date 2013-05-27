@@ -1,3 +1,4 @@
+#include<stdio.h>
 #include"common.h"
 #include"luaprof.h"
 
@@ -44,6 +45,11 @@ void* lloc(int size) {
     }
 
     memset(m, 0, size);
+
+    if (gc.n > MSIZE) {
+        perror("Too many memory used\n");
+        exit(-1);
+    }
 
     gc.table[gc.n++] = m;
 
