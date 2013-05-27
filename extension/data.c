@@ -1,3 +1,5 @@
+#include<sys/types.h>
+#include<sys/stat.h>
 #include"data.h"
 
 char* error;
@@ -6,10 +8,12 @@ int data2dot(tree* t, const char *fdot, const char *fpng) {
     unsigned int i;
     child *cld;
     char cmd[1000];
-    FILE *fp = fopen(fdot, "w+");
+    FILE *fp;
     Func *f = NULL;
     int r, g;
     double rate;
+
+    openfile(fp, fdot);
 
     if ( ! fp) {
         error = "[ERROR]: can not create file\n";
@@ -74,9 +78,11 @@ int data2text(tree* t, const char* fpath) {
 
     unsigned int i;
 
-    FILE *fp = fopen(fpath, "w+");
+    FILE *fp;
 
     Func *f = NULL;
+
+    openfile(fp, fpath);
 
     if ( ! fp) {
         error = "lprof error : Can not open output; ensure the file's limits is 666";
@@ -98,9 +104,11 @@ int data2text(tree* t, const char* fpath) {
 int data2js(tree* t, const char* fpath) {
     unsigned int i;
 
-    FILE *fp = fopen(fpath, "w+");
+    FILE *fp;
 
     Func *f = NULL;
+
+    openfile(fp, fpath);
 
     if ( ! fp) {
         error = "lprof error : Can not open output file";
