@@ -11,16 +11,14 @@ sudo make
 mv luaprof.so /usr/local/lib/lua/5.1/  #this dir may be different to your computer
 ```
 ##API
-###start(filepath)
+###start()
 start the luaprof, then the luaprof will begin to track your code from here
-
-NOTE : the argument filepath should be an absolute path, and the file must can be writen
 
 ###stop()
 stop the luaprof
 
-###output()
-write the data into the file, which you assigned before in the function luaprof.start()
+###printr()
+write the data on the screen
 
 ###release()
 release the memory using by luaprof
@@ -57,13 +55,13 @@ function test()
     fibo(6)
 end
 
-profile.start("/home/cloudfly/work/logs/test_prof.out")
+profile.start()
 
 test()
 
 profile.stop()
 
-
+--the dir `./` should have write access
 profile.save2dot("./data.dot", "./data.png")
 profile.save2js("./data.js")
 profile.save2txt("./data.txt")
