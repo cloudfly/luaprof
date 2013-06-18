@@ -58,7 +58,6 @@ printf("%-20s%-20sNewStack\n", "pushFunc", item->func_name);
 static Func* popFunc() {
     int now = gettime();
     Func* tmp;
-    int p = -1; /* index of now poping function's parent */
 
 
     if (state) {
@@ -76,12 +75,10 @@ printf("%-20s%-20s\n", "popFunc", tmp->func_name);
         if (state) {
             state->next = (FuncNode*)NULL;
             state->item->net_begin = now;   /*reset the net-time's begin data of the stack-top function*/
-            p = state->item->index;
         }
 
         /*give running data to tree*/
         update_time(t, tmp->index, tmp); 
-        add_log(t, tmp->index, p, tmp->end - tmp->begin);
 
         return tmp;
 
