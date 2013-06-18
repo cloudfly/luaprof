@@ -12,7 +12,7 @@
 
 
 /*the gc memory size*/
-#define MSIZE 1000
+#define MSIZE 8192
 #define LUAPROF_DEBUG
 
 typedef struct Func{

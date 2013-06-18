@@ -4,7 +4,7 @@
 
 #include"luaprof.h"
 
-#define MAX 1000
+#define MAX 8192
 #define SCOUNT 10
 #define LOGCOUNT 10
 
