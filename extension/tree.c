@@ -12,7 +12,7 @@ Func* get_func(tree* t, const char* name){
     for(i = 0; i < t->nfunc; i++) {
         if (strcmp(name, fcvalue(i)->func_name) == 0) {
 #ifdef LUAPROF_DEBUG
-printf("%-20s%-20sGetit\n", "get_func", name);
+printf("%-20s%-20sGetit@Position:%u\n", "get_func", name, i);
 #endif
             return fcvalue(i);
         }
@@ -112,7 +112,7 @@ printf("%-20s%-20s\n", "add_log", fcvalue(idx)->func_name);
 void update_time(tree* t, int idx, Func* f) {
 
 #ifdef LUAPROF_DEBUG
-printf("%-20s%-20sPosition %lu\n", "update_time", f->func_name, f->total);
+printf("%-20s%-20stime=%-10luPosition %u\n", "update_time", f->func_name, f->total, f->index);
 #endif
     if (idx >= 0 && idx < (int)t->nfunc) {
         fcvalue(idx)->time = f->time;

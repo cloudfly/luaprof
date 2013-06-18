@@ -10,7 +10,7 @@ unsigned long gettime();
 void* lloc(int size);
 
 
-#define illoc(c, s) ( (c*)lloc(sizeof(c)*(s)) )
+#define illoc(c, s) ( (c*)lloc(sizeof(c)*(s)+1) )
 
 
 #endif

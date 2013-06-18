@@ -259,7 +259,7 @@ int pf_stop(lua_State *L)
     lua_sethook(L, NULL, 0, 0);
 
 #ifdef LUAPROF_DEBUG
-printf("%-20s\n", "pf_stop");
+printf("%-20s%u functions    %u malloc\n", "pf_stop", t->nfunc, gc.n);
 #endif
 
     return 0;
@@ -342,17 +342,28 @@ int pf_test() {
 
 int pf_release() {
 
-    unsigned int i;
+    int i = gc.n - 1;
 
-    for(i = 0;i < gc.n; i++) {
+#ifdef LUAPROF_DEBUG
+printf("%-20s\n", "pf_release");
+#endif
+    for(;i >= 0; i--) {
 
         if (gc.table[i]) {
+#ifdef LUAPROF_DEBUG
+printf("%i-", i);
+#endif
             free(gc.table[i]);
             gc.table[i] = NULL;
         }
     }
+
+#ifdef LUAPROF_DEBUG
+printf("\n");
+#endif
     return 0;
 }
+
 
 
 static const struct luaL_Reg lib[] = {
