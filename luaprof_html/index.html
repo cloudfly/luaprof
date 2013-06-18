@@ -29,11 +29,14 @@
     }
 
     var t = 0;
+
+    /*first for, gd.calls should be calculate first,because it will be used in generate_html(),*/
     for(i = 0; i < gd.nfunc; i++) {
         gd.calls += profile_data[i].count;
         t += profile_data[i].time;
     }
 
+    /*second for, time and count data. using generate_html to build html code*/
     for(i = 0; i < gd.nfunc; i++) {
         gd.tdata[i] = [
             profile_data[i].name,
@@ -151,6 +154,7 @@
 	</head>
 	<body>
 <script src="./js/highcharts.js"></script>
+<script src="./js/viz.js"></script>
 <div id = "wrapper">
     <div id = "table">
         <table border=1>
