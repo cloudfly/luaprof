@@ -1,4 +1,5 @@
 #include"tree.h"
+#include"luaprof.h"
 #include<string.h>
 
 

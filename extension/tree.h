@@ -1,7 +1,6 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
-
 #include"luaprof.h"
 
 #define MAX 1024

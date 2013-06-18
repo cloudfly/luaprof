@@ -1,4 +1,5 @@
 #include"data.h"
+#include"luaprof.h"
 
 char* error;
 

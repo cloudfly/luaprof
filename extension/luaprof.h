@@ -14,6 +14,7 @@
 /*the gc memory size*/
 #define MSIZE 131072
 #define LUAPROF_DEBUG
+#undef LUAPROF_DEBUG
 
 typedef struct Func{
     char *func_name;    /* function name */
